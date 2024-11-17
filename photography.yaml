@@ -1,0 +1,535 @@
+openapi: 3.0.3
+info:
+  title: Example API
+  description: A REST API for managing authentication, jobs, customers, groups, pictures, and instruments.
+  version: 1.0.0
+
+paths:
+  /auth:
+    post:
+      summary: Authenticate the user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                firstName:
+                  type: string
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: bearer token for authenticated user
+        '400':
+          description: Bad request, invalid request body
+        '401':
+          description: Unauthorized, invalid credentials
+        '500':
+          description: Internal server error
+  /jobs:
+    get:
+      summary: Retrieve all jobs
+      responses:
+        '200':
+          description: A list of jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'
+        '400':
+          description: Bad request, invalid query parameters
+        '500':
+          description: Internal server error
+    post:
+      summary: Create a new job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+      responses:
+        '200':
+          description: Job created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Default'
+        '400':
+          description: Bad request, invalid input data
+        '500':
+          description: Internal server error
+  /jobs/{jobId}:
+    get:
+      summary: Retrieve a specific job by ID
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          description: The unique identifier for the job
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A job object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          description: Bad request, invalid job ID format
+        '500':
+          description: Internal server error
+    patch:
+      summary: Update a job by ID
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          description: The unique identifier for the job
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+      responses:
+        '200':
+          description: Job updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Default'
+        '400':
+          description: Bad request, invalid input data or job ID
+        '500':
+          description: Internal server error
+  /groups:
+    get:
+      summary: Retrieve all groups
+      responses:
+        '200':
+          description: A list of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        '400':
+          description: Bad request, invalid query parameters
+        '500':
+          description: Internal server error
+    post:
+      summary: Create a new group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+      responses:
+        '200':
+          description: Group created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Default'
+        '400':
+          description: Bad request, invalid input data
+        '500':
+          description: Internal server error
+  /groups/{groupId}:
+    get:
+      summary: Retrieve a specific group by ID
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          description: The unique identifier for the group
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A group object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          description: Bad request, invalid group ID format
+        '500':
+          description: Internal server error
+    patch:
+      summary: Update a group by ID
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          description: The unique identifier for the group
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+      responses:
+        '200':
+          description: Group updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Default'
+        '400':
+          description: Bad request, invalid input data or group ID
+        '500':
+          description: Internal server error
+  /pictures:
+    get:
+      summary: Retrieve all pictures
+      responses:
+        '200':
+          description: A list of pictures
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Picture'
+        '400':
+          description: Bad request, invalid query parameters
+        '500':
+          description: Internal server error
+    post:
+      summary: Upload a new picture
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Picture'
+      responses:
+        '200':
+          description: Picture uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Default'
+        '400':
+          description: Bad request, invalid input data
+        '500':
+          description: Internal server error
+  /pictures/{pictureId}:
+    get:
+      summary: Retrieve a specific picture by ID
+      parameters:
+        - name: pictureId
+          in: path
+          required: true
+          description: The unique identifier for the picture
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A picture object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Picture'
+        '400':
+          description: Bad request, invalid picture ID format
+        '500':
+          description: Internal server error
+    patch:
+      summary: Update a picture by ID
+      parameters:
+        - name: pictureId
+          in: path
+          required: true
+          description: The unique identifier for the picture
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Picture'
+      responses:
+        '200':
+          description: Picture updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Default'
+        '400':
+          description: Bad request, invalid input data or picture ID
+        '500':
+          description: Internal server error
+  /instruments:
+    get:
+      summary: Retrieve all instruments
+      responses:
+        '200':
+          description: A list of instruments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Instrument'
+        '400':
+          description: Bad request, invalid query parameters
+        '500':
+          description: Internal server error
+    post:
+      summary: Add a new instrument
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Instrument'
+      responses:
+        '200':
+          description: Instrument added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Default'
+        '400':
+          description: Bad request, invalid input data
+        '500':
+          description: Internal server error
+  /instruments/{instrumentId}:
+    get:
+      summary: Retrieve a specific instrument
+      parameters:
+        - name: instrumentId
+          in: path
+          required: true
+          description: The unique identifier for the instrument
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: An instrument object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instrument'
+        '400':
+          description: Bad request, invalid picture ID format
+        '500':
+          description: Internal server error
+    patch:
+      summary: Update an instrument by ID
+      parameters:
+        - name: instrumentId
+          in: path
+          required: true
+          description: The unique identifier for the instrument
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Instrument'
+      responses:
+        '200':
+          description: Picture updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Default'
+        '400':
+          description: Bad request, invalid input data or ID
+        '500':
+          description: Internal server error
+  /orders:
+    get:
+      summary: Retrieve all orders
+      responses:
+        '200':
+          description: A list of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '400':
+          description: Bad request, invalid query parameters
+        '500':
+          description: Internal server error
+    post:
+      summary: Add a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '200':
+          description: Order added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Default'
+        '400':
+          description: Bad request, invalid input data
+        '500':
+          description: Internal server error
+  /orders/{orderId}:
+    get:
+      summary: Retrieve a specific order
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          description: The unique identifier for the order
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: An order object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Bad request, invalid order ID format
+        '500':
+          description: Internal server error
+    patch:
+      summary: Update an order by ID
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          description: The unique identifier for the order
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '200':
+          description: Picture updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Default'
+        '400':
+          description: Bad request, invalid input data or ID
+        '500':
+          description: Internal server error
+components:
+  schemas:
+    Default:
+      type: object
+      properties:
+        id:
+          type: integer
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    Picture:
+      type: object
+      properties:
+        id:
+          type: integer
+        pictureNum:
+          type: string
+        section:
+          type: string
+    Job:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        year:
+          type: integer
+    Instrument:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        section:
+          type: string
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        jobName:
+          type: string
+        jobYear:
+          type: integer
+        recordNum:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        zip:
+          type: integer
+        phone:
+          type: string
+        groupQuantity:
+          type: integer
+        groupName:
+          type: string
+        groupPictureNum:
+          type: string
+        instrumentId:
+          type: integer
+        instrumentQuantity:
+          type: integer
+        instrumentPosition:
+          type: integer
+        instrumentPictureNum:
+          type: string
+        paymentMethod:
+          type: string
+        checkNum:
+          type: integer
+        amount:
+          type: integer
+        doe:
+          type: string
+
