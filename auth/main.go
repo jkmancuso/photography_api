@@ -11,6 +11,7 @@ import (
 
 var statusCode = 200
 var table = "admins"
+var genericErrorJSON = `{"STATUS":"ERROR"}`
 
 type AuthFunc func(events.APIGatewayProxyRequest) (string, int, error)
 
@@ -55,13 +56,13 @@ func auth(request events.APIGatewayProxyRequest) (string, int, error) {
 
 	if err != nil {
 		log.Println(err)
-		return "", http.StatusInternalServerError, err
+		return genericErrorJSON, http.StatusInternalServerError, err
 	}
 
 	err, token := db.getToken(login)
 
 	if err != nil {
-		return "", http.StatusInternalServerError, err
+		return genericErrorJSON, http.StatusInternalServerError, err
 	}
 
 	return token, http.StatusOK, nil
