@@ -1,16 +1,18 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
 var statusCode = 200
+var table = "admins"
+
+type AuthFunc func(events.APIGatewayProxyRequest) (string, int, error)
 
 func main() {
 	lambda.Start(handler)
@@ -21,60 +23,51 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	log.Println("Entering handler")
 
-	routes := map[string]func() (string, error){
+	routes := map[string]AuthFunc{
 		"/auth":      auth,
 		"/auth/ping": pong,
 	}
 
-	returnBody, err := routes[request.Path]()
+	var returnBody string
+	var err error
 
-	if err != nil {
-		statusCode = 500
-	}
+	returnBody, statusCode, err = routes[request.Path](request)
+
+	returnBody = fmt.Sprintf("%v\n%+v", returnBody, request)
 
 	return events.APIGatewayProxyResponse{
 		Body:       returnBody,
 		StatusCode: statusCode,
-	}, nil
+	}, err
 }
 
-func auth() (string, error) {
-	ctx := context.Background()
+func auth(request events.APIGatewayProxyRequest) (string, int, error) {
 
 	log.Println("Entering auth")
 
-	//table := "admins"
+	login, err := NewLogin(request)
 
-	/*dynamoOutput, err := client.Scan(ctx, &dynamodb.ScanInput{
-		TableName: &table,
-	})*/
+	if err != nil {
+		return login.responseHTTPMsg, login.responseHTTPCode, err
+	}
 
-	cfg, err := config.LoadDefaultConfig(ctx)
+	db, err := NewDB(table)
 
 	if err != nil {
 		log.Println(err)
-		return "", err
+		return "", http.StatusInternalServerError, err
 	}
 
-	client := *dynamodb.NewFromConfig(cfg)
-
-	log.Printf("Client created success")
-
-	dynamoOutput, err := client.ListTables(ctx, &dynamodb.ListTablesInput{})
+	err, token := db.getToken(login)
 
 	if err != nil {
-		log.Println(err)
-		return "", err
+		return "", http.StatusInternalServerError, err
 	}
 
-	log.Printf("Got query results %+v", dynamoOutput.TableNames)
+	return token, http.StatusOK, nil
 
-	/*for item := range dynamoOutput.Items {
-		log.Printf("GOT: %+v\n", item)
-	}*/
-	return "Got to auth endpoint", nil
 }
 
-func pong() (string, error) {
-	return "pong", nil
+func pong(request events.APIGatewayProxyRequest) (string, int, error) {
+	return "pong", http.StatusOK, nil
 }
