@@ -59,7 +59,7 @@ func auth(request events.APIGatewayProxyRequest) (string, int, error) {
 		return genericErrorJSON, http.StatusInternalServerError, err
 	}
 
-	err, token := db.getToken(login)
+	token, err := db.getToken(login)
 
 	if err != nil {
 		return genericErrorJSON, http.StatusInternalServerError, err

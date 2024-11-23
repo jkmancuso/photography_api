@@ -20,7 +20,7 @@ type dbInfo struct {
 }
 
 type dbItem struct {
-	token string `dynamodbav:"token"`
+	Token string `dynamodbav:"token"`
 }
 
 func NewDB(table string) (*dbInfo, error) {
@@ -43,14 +43,21 @@ func NewDB(table string) (*dbInfo, error) {
 	return db, nil
 }
 
-func (db *dbInfo) getToken(login *UserLogin) (error, string) {
+func (db *dbInfo) getToken(login *UserLogin) (string, error) {
+
 	email, err := attributevalue.Marshal(login.email)
 
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
-	key := map[string]types.AttributeValue{"email": email}
+	hashpass, err := attributevalue.Marshal(login.hashpass)
+
+	if err != nil {
+		return "", err
+	}
+
+	key := map[string]types.AttributeValue{"email": email, "hashpass": hashpass}
 
 	query := dynamodb.GetItemInput{
 		TableName: &db.tablename,
@@ -60,21 +67,21 @@ func (db *dbInfo) getToken(login *UserLogin) (error, string) {
 	response, err := db.client.GetItem(context.Background(), &query)
 
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
 	row := dbItem{}
 
 	if err = attributevalue.UnmarshalMap(response.Item, &row); err != nil {
-		return err, ""
+		return "", err
 	}
 
 	rowJSON, err := json.Marshal(row)
 
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
-	return nil, string(rowJSON)
+	return string(rowJSON), err
 
 }
