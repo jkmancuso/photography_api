@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -24,6 +25,7 @@ type dbItem struct {
 }
 
 func NewDB(table string) (*dbInfo, error) {
+	log.Println("entering NewDB")
 	db := &dbInfo{tablename: table}
 
 	cfg, err := config.LoadDefaultConfig(context.Background())
@@ -44,6 +46,7 @@ func NewDB(table string) (*dbInfo, error) {
 }
 
 func (db *dbInfo) getToken(login *UserLogin) (string, error) {
+	log.Println("Entering getToken")
 
 	email, err := attributevalue.Marshal(login.email)
 
@@ -68,6 +71,11 @@ func (db *dbInfo) getToken(login *UserLogin) (string, error) {
 
 	if err != nil {
 		return "", err
+	}
+
+	if response.Item == nil {
+		login.setstatusCode(http.StatusBadRequest)
+		return `{"STATUS":"NO_RESULTS"}`, nil
 	}
 
 	row := dbItem{}

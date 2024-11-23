@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -9,7 +8,6 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-var statusCode = 200
 var table = "admins"
 var genericErrorJSON = `{"STATUS":"ERROR"}`
 
@@ -29,17 +27,16 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		"/auth/ping": pong,
 	}
 
-	var returnBody string
-	var err error
+	returnBody, statusCode, err := routes[request.Path](request)
 
-	returnBody, statusCode, err = routes[request.Path](request)
-
-	returnBody = fmt.Sprintf("%v\n%+v", returnBody, request)
+	if err != nil {
+		log.Println(err)
+	}
 
 	return events.APIGatewayProxyResponse{
 		Body:       returnBody,
 		StatusCode: statusCode,
-	}, err
+	}, nil
 }
 
 func auth(request events.APIGatewayProxyRequest) (string, int, error) {
@@ -65,7 +62,7 @@ func auth(request events.APIGatewayProxyRequest) (string, int, error) {
 		return genericErrorJSON, http.StatusInternalServerError, err
 	}
 
-	return token, http.StatusOK, nil
+	return token, login.responseHTTPCode, nil
 
 }
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -28,6 +29,7 @@ func (login *UserLogin) setHTTPMsg(msg string) {
 }
 
 func NewLogin(req events.APIGatewayProxyRequest) (*UserLogin, error) {
+	log.Println("Entering NewLogin")
 
 	email, password := parseEventBody(req)
 
@@ -36,10 +38,11 @@ func NewLogin(req events.APIGatewayProxyRequest) (*UserLogin, error) {
 
 	if len(email) == 0 || len(password) == 0 {
 		login.setstatusCode(http.StatusBadRequest)
-		login.setHTTPMsg(`{"STATUS":"INVALID_EVENT"`)
-		err = errors.New("bad request")
+		login.setHTTPMsg(`{"STATUS":"INVALID_REQUEST"}`)
+		err = errors.New("missing email or password in body")
 	} else {
 		login.setUserPass(email, password)
+		login.setstatusCode(http.StatusOK)
 	}
 
 	return &login, err

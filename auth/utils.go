@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha512"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/mail"
 
@@ -42,5 +43,5 @@ func generateHash(s string) string {
 	h := sha512.New()
 	h.Write([]byte(s))
 
-	return string(h.Sum(nil))
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
