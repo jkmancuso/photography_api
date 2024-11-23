@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -24,16 +23,9 @@ type dbItem struct {
 	Token string `dynamodbav:"token"`
 }
 
-func NewDB(table string) (*dbInfo, error) {
+func NewDB(table string, cfg aws.Config) (*dbInfo, error) {
 	log.Println("entering NewDB")
 	db := &dbInfo{tablename: table}
-
-	cfg, err := config.LoadDefaultConfig(context.Background())
-
-	if err != nil {
-		log.Println(err)
-		return db, err
-	}
 
 	client := dynamodb.NewFromConfig(cfg)
 

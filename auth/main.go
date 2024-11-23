@@ -9,6 +9,7 @@ import (
 )
 
 var table = "admins"
+var secretName = "salt"
 var genericErrorJSON = `{"STATUS":"ERROR"}`
 
 type AuthFunc func(events.APIGatewayProxyRequest) (string, int, error)
@@ -43,13 +44,26 @@ func auth(request events.APIGatewayProxyRequest) (string, int, error) {
 
 	log.Println("Entering auth")
 
-	login, err := NewLogin(request)
+	cfg, err := NewAWSCfg()
+
+	if err != nil {
+		return genericErrorJSON, http.StatusInternalServerError, err
+	}
+
+	saltStr, err := GetSalt(cfg)
+
+	if err != nil || len(saltStr) == 0 {
+		log.Println(err)
+		return genericErrorJSON, http.StatusInternalServerError, err
+	}
+
+	login, err := NewLogin(request, saltStr)
 
 	if err != nil {
 		return login.responseHTTPMsg, login.responseHTTPCode, err
 	}
 
-	db, err := NewDB(table)
+	db, err := NewDB(table, cfg)
 
 	if err != nil {
 		log.Println(err)

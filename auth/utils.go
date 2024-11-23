@@ -39,9 +39,10 @@ func parseEventBody(e events.APIGatewayProxyRequest) (string, string) {
 	return login.Email, login.Password
 }
 
-func generateHash(s string) string {
+func generateHash(s string, salt string) string {
+
 	h := sha512.New()
-	h.Write([]byte(s))
+	h.Write([]byte(s + salt))
 
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
