@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
@@ -20,7 +21,7 @@ type dbInfo struct {
 }
 
 type dbItem struct {
-	Token string `dynamodbav:"token"`
+	Token string `dynamodbav:"token" json:"Token"`
 }
 
 func NewDB(table string, cfg aws.Config) (*dbInfo, error) {
@@ -67,7 +68,7 @@ func (db *dbInfo) getToken(login *UserLogin) (string, error) {
 
 	if response.Item == nil {
 		login.setstatusCode(http.StatusBadRequest)
-		return `{"STATUS":"NO_RESULTS"}`, nil
+		return `{"STATUS":"NO_RESULTS"}`, errors.New("invalid user/pass")
 	}
 
 	row := dbItem{}

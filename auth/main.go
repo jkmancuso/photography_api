@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -11,6 +13,7 @@ import (
 var table = "admins"
 var secretName = "salt"
 var genericErrorJSON = `{"STATUS":"ERROR"}`
+var cookieAge = 86400
 
 type AuthFunc func(events.APIGatewayProxyRequest) (string, int, error)
 
@@ -30,13 +33,22 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	returnBody, statusCode, err := routes[request.Path](request)
 
+	headers := make(map[string]string)
+
 	if err != nil {
 		log.Println(err)
+	} else {
+		token := dbItem{}
+
+		if err = json.Unmarshal([]byte(returnBody), &token); err == nil {
+			headers["Set-Cookie"] = fmt.Sprintf("token=%q; max-age=%d", token.Token, cookieAge)
+		}
 	}
 
 	return events.APIGatewayProxyResponse{
 		Body:       returnBody,
 		StatusCode: statusCode,
+		Headers:    headers,
 	}, nil
 }
 
