@@ -22,6 +22,8 @@ func GetSalt(cfg aws.Config) (string, error) {
 		return "", err
 	}
 
+	log.Println("Retrieved Salt from secretsmgr")
+
 	// Decrypts secret using the associated KMS key.
 	return *result.SecretString, nil
 
