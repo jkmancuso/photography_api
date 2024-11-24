@@ -28,7 +28,7 @@ type UserLogin struct {
 func (login *UserLogin) setUserPass(email string, password string, salt string) {
 	login.email = email
 
-	hashpass, err := generateHash(password, salt)
+	hashpass, err := shared.GenerateHash(password, salt)
 
 	if err != nil {
 		log.Println("ERROR generating hash")
@@ -47,7 +47,7 @@ func (login *UserLogin) setHTTPMsg(msg string) {
 func NewLogin(req events.APIGatewayProxyRequest, salt string) (*UserLogin, error) {
 	log.Println("Entering NewLogin")
 
-	email, password := parseEventBody(req)
+	email, password := shared.ExtractCredsFromEvent(req)
 
 	login := UserLogin{creationTime: time.Now()}
 	var err error

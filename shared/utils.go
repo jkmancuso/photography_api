@@ -1,4 +1,4 @@
-package main
+package shared
 
 import (
 	"crypto/sha512"
@@ -16,7 +16,7 @@ type SimpleLogin struct {
 	Password string `json:"password"`
 }
 
-func parseEventBody(e events.APIGatewayProxyRequest) (string, string) {
+func ExtractCredsFromEvent(e events.APIGatewayProxyRequest) (string, string) {
 	if len(e.Body) == 0 {
 		return "", ""
 	}
@@ -40,7 +40,7 @@ func parseEventBody(e events.APIGatewayProxyRequest) (string, string) {
 	return login.Email, login.Password
 }
 
-func generateHash(s string, salt string) (string, error) {
+func GenerateHash(s string, salt string) (string, error) {
 
 	if len(s) == 0 || len(salt) == 0 {
 		return "", errors.New("missing string to generate hash")
