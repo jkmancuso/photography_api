@@ -104,10 +104,12 @@ func auth(request events.APIGatewayProxyRequest) (string, int, error) {
 	token, err := adminTable.getToken(login)
 
 	if err != nil {
-		return token, http.StatusInternalServerError, err
+		login.setstatusCode(http.StatusBadRequest)
 	}
 
-	if loginTable.recordLoginToken(login); err != nil {
+	//Allow the failed login to move to the next step so you can record the failure
+
+	if addRecordErr := loginTable.recordLoginToken(login); addRecordErr != nil {
 		login.responseHTTPCode = http.StatusInternalServerError
 		log.Println("error adding login record")
 	}

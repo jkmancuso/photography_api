@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
@@ -73,7 +72,6 @@ func (db *dbInfo) getToken(login *UserLogin) (string, error) {
 	}
 
 	if response.Item == nil {
-		login.setstatusCode(http.StatusBadRequest)
 		return `{"STATUS":"INVALID_USER_PASS"}`, errors.New("invalid user/pass")
 	}
 
