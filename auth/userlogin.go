@@ -19,7 +19,13 @@ type UserLogin struct {
 
 func (login *UserLogin) setUserPass(email string, password string, salt string) {
 	login.email = email
-	login.hashpass = generateHash(password, salt)
+
+	hashpass, err := generateHash(password, salt)
+
+	if err != nil {
+		log.Println("ERROR generating hash")
+	}
+	login.hashpass = hashpass
 }
 
 func (login *UserLogin) setstatusCode(code int) {

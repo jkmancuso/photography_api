@@ -12,13 +12,13 @@ import (
 )
 
 var (
-	tables           = map[string]string{"admin": "admins", "login": "logins"}
-	adminTable       *dbInfo
-	secretName       = "salt"
-	genericErrorJSON = `{"STATUS":"ERROR"}`
-	cookieAge        = 86400
-	awsCfg           aws.Config
-	saltStr          string
+	tables                 = map[string]string{"admin": "admins", "login": "logins"}
+	adminTable, loginTable *dbInfo
+	secretName             = "salt"
+	cookieAge              = 86400
+	awsCfg                 aws.Config
+	saltStr                string
+	genericError           = `{"STATUS":"ERROR"}`
 )
 
 type AuthFunc func(events.APIGatewayProxyRequest) (string, int, error)
@@ -44,11 +44,11 @@ func init() {
 		log.Fatal(err)
 	}
 
-	/*loginTable, err = NewDB(tables["login"], awsCfg)
+	loginTable, err = NewDB(tables["login"], awsCfg)
 
 	if err != nil {
 		log.Fatal(err)
-	}*/
+	}
 
 }
 
@@ -69,18 +69,12 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		log.Println(err)
 
 	} else {
-		token := dbItem{}
+		token := dbAdminItem{}
 
 		if err = json.Unmarshal([]byte(returnBody), &token); err == nil {
 			headers["Set-Cookie"] = fmt.Sprintf("token=%q; max-age=%d", token.Token, cookieAge)
 		}
 	}
-
-	/*loginTable := dbInfo{
-		tablename: tables["login"],
-
-
-	}*/
 
 	return events.APIGatewayProxyResponse{
 		Body:       returnBody,
@@ -93,6 +87,14 @@ func auth(request events.APIGatewayProxyRequest) (string, int, error) {
 
 	log.Println("Entering auth")
 
+	var err error
+
+	saltStr, err = GetSalt(awsCfg)
+
+	if err != nil {
+		return genericError, http.StatusInternalServerError, err
+	}
+
 	login, err := NewLogin(request, saltStr)
 
 	if err != nil {
@@ -102,10 +104,15 @@ func auth(request events.APIGatewayProxyRequest) (string, int, error) {
 	token, err := adminTable.getToken(login)
 
 	if err != nil {
-		return genericErrorJSON, http.StatusInternalServerError, err
+		return token, http.StatusInternalServerError, err
 	}
 
-	return token, login.responseHTTPCode, nil
+	if loginTable.recordLoginToken(login); err != nil {
+		login.responseHTTPCode = http.StatusInternalServerError
+		log.Println("error adding login record")
+	}
+
+	return token, login.responseHTTPCode, err
 
 }
 

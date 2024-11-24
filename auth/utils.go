@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha512"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/mail"
@@ -39,10 +40,13 @@ func parseEventBody(e events.APIGatewayProxyRequest) (string, string) {
 	return login.Email, login.Password
 }
 
-func generateHash(s string, salt string) string {
+func generateHash(s string, salt string) (string, error) {
+
+	if len(s) == 0 || len(salt) == 0 {
+		return "", errors.New("missing string to generate hash")
+	}
 
 	h := sha512.New()
 	h.Write([]byte(s + salt))
-
-	return fmt.Sprintf("%x", h.Sum(nil))
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }

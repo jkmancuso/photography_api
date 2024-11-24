@@ -20,8 +20,14 @@ type dbInfo struct {
 	client    *dynamodb.Client
 }
 
-type dbItem struct {
+type dbAdminItem struct {
 	Token string `dynamodbav:"token" json:"Token"`
+}
+
+type dbLoginItem struct {
+	Email     string `dynamodbav:"email"`
+	LoginDate int    `dynamodbav:"login_date"`
+	Success   bool   `dynamodbav:"success"`
 }
 
 func NewDB(table string, cfg aws.Config) (*dbInfo, error) {
@@ -68,16 +74,16 @@ func (db *dbInfo) getToken(login *UserLogin) (string, error) {
 
 	if response.Item == nil {
 		login.setstatusCode(http.StatusBadRequest)
-		return `{"STATUS":"NO_RESULTS"}`, errors.New("invalid user/pass")
+		return `{"STATUS":"INVALID_USER_PASS"}`, errors.New("invalid user/pass")
 	}
 
-	row := dbItem{}
+	adminItem := dbAdminItem{}
 
-	if err = attributevalue.UnmarshalMap(response.Item, &row); err != nil {
+	if err = attributevalue.UnmarshalMap(response.Item, &adminItem); err != nil {
 		return "", err
 	}
 
-	rowJSON, err := json.Marshal(row)
+	rowJSON, err := json.Marshal(adminItem)
 
 	if err != nil {
 		return "", err
@@ -85,4 +91,36 @@ func (db *dbInfo) getToken(login *UserLogin) (string, error) {
 
 	return string(rowJSON), err
 
+}
+
+func (db *dbInfo) recordLoginToken(login *UserLogin) error {
+
+	success := true
+
+	if login.responseHTTPCode != 200 {
+		success = false
+	}
+
+	loginItem := dbLoginItem{
+		Email:     login.email,
+		LoginDate: int(login.creationTime.UnixMilli()),
+		Success:   success,
+	}
+
+	item, err := attributevalue.MarshalMap(loginItem)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = db.client.PutItem(context.Background(), &dynamodb.PutItemInput{
+		TableName: aws.String(db.tablename),
+		Item:      item,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
