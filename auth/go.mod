@@ -1,4 +1,4 @@
-module github.com/jkmancuso/photography_api
+module github.com/jkmancuso/photography_api/auth
 
 go 1.22.3
 
