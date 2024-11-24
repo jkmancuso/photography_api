@@ -9,11 +9,12 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/jkmancuso/photography_api/shared"
 )
 
 var (
 	tables                 = map[string]string{"admin": "admins", "login": "logins"}
-	adminTable, loginTable *dbInfo
+	adminTable, loginTable *shared.DBInfo
 	secretName             = "salt"
 	cookieAge              = 86400
 	awsCfg                 aws.Config
@@ -32,19 +33,19 @@ func init() {
 
 	var err error
 
-	awsCfg, err = NewAWSCfg()
+	awsCfg, err = shared.NewAWSCfg()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	adminTable, err = NewDB(tables["admin"], awsCfg)
+	adminTable, err = shared.NewDB(tables["admin"], awsCfg)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	loginTable, err = NewDB(tables["login"], awsCfg)
+	loginTable, err = shared.NewDB(tables["login"], awsCfg)
 
 	if err != nil {
 		log.Fatal(err)
@@ -69,7 +70,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		log.Println(err)
 
 	} else {
-		token := dbAdminItem{}
+		token := shared.DBAdminItem{}
 
 		if err = json.Unmarshal([]byte(returnBody), &token); err == nil {
 			headers["Set-Cookie"] = fmt.Sprintf("token=%q; max-age=%d", token.Token, cookieAge)
@@ -101,7 +102,7 @@ func auth(request events.APIGatewayProxyRequest) (string, int, error) {
 		return login.responseHTTPMsg, login.responseHTTPCode, err
 	}
 
-	token, err := adminTable.getToken(login)
+	token, err := login.getToken(adminTable)
 
 	if err != nil {
 		login.setstatusCode(http.StatusBadRequest)
@@ -109,7 +110,7 @@ func auth(request events.APIGatewayProxyRequest) (string, int, error) {
 
 	//Allow the failed login to move to the next step so you can record the failure
 
-	if addRecordErr := loginTable.recordLoginToken(login); addRecordErr != nil {
+	if addRecordErr := login.recordLoginToken(loginTable); addRecordErr != nil {
 		login.responseHTTPCode = http.StatusInternalServerError
 		log.Println("error adding login record")
 	}
