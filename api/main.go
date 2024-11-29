@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -9,14 +10,20 @@ import (
 	"github.com/jkmancuso/photography_api/shared"
 )
 
+type handlerFunc func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)
+
 var (
 	/*create all Dynamo connections as Global variables so
 	they are re used during Lambda warm start
 	https://docs.aws.amazon.com/lambda/latest/dg/static-initialization.html
 	*/
 
-	tablesMap  = make(map[string]*shared.DBInfo)
-	tableNames = []string{"jobs", "groups", "pictures", "instruments", "orders"}
+	endpointHandlers = map[string]handlerFunc{
+		"/jobs":        jobs,
+		"/groups":      groups,
+		"/pictures":    pictures,
+		"/instruments": instruments,
+		"/orders":      orders}
 
 	// same for aws config
 	awsCfg aws.Config
@@ -33,15 +40,6 @@ func init() {
 		log.Fatal(err)
 	}
 
-	for _, name := range tableNames {
-		db, err := shared.NewDB(name, awsCfg)
-		tablesMap[name] = db
-
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
 }
 func main() {
 	lambda.Start(handler)
@@ -51,16 +49,37 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	log.Println("Entering handler")
 
-	/*	routes := map[string]AuthFunc{
-			"/auth":      auth,
-			"/auth/ping": pong,
-		}
+	response, err := routeRequestToHandler(request)
 
-		returnBody, statusCode, _ := routes[request.Path](request)
-	*/
+	if err != nil {
+		log.Print(err)
+	}
 
 	return events.APIGatewayProxyResponse{
-		Body:       `{"hi":"there"}`,
-		StatusCode: 200,
-	}, nil
+		Body:       response.Body,
+		StatusCode: response.StatusCode,
+	}, err
+}
+
+func routeRequestToHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	response := events.APIGatewayProxyResponse{}
+
+	endpoint := shared.GetTargetEndpoint(request.Path)
+
+	if len(endpoint) == 0 {
+		return response, errors.New("invalid api path")
+	}
+
+	if _, ok := endpointHandlers[endpoint]; !ok {
+		return response, errors.New("no handler for this api path")
+	}
+
+	if err := shared.ValidateEvent(request); err != nil {
+		return response, err
+	}
+
+	response, err := endpointHandlers[endpoint](request)
+
+	return response, err
+
 }
