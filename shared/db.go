@@ -83,5 +83,7 @@ func ParseBodyIntoNewJob(body string) (*DBJobItem, error) {
 		err = errors.New("missing field in body")
 	}
 
+	log.Println(jobItem)
+
 	return jobItem, err
 }

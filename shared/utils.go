@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/mail"
 	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -67,39 +66,22 @@ func GetTargetEndpoint(path string, withoutLeadingSlash bool) string {
 
 func ValidateEvent(e events.APIGatewayProxyRequest) error {
 
-	pathParam := strings.Split(e.Path, "/")[2]
-
-	if slices.Contains([]string{"POST", "PATCH"}, e.HTTPMethod) {
-
-		if len(pathParam) == 0 {
-			return fmt.Errorf("missing path param for method %v", e.Path)
-		}
-
-		if _, err := strconv.Atoi(pathParam); err != nil {
-			return fmt.Errorf("path param %v should be an int", pathParam)
-		}
+	if len(e.HTTPMethod) == 0 {
+		return errors.New("no idea what this is")
 	}
 
-	if slices.Contains([]string{"GET", "DELETE"}, e.HTTPMethod) {
+	if slices.Contains([]string{"POST", "PATCH"}, e.HTTPMethod) && len(e.Body) == 0 {
+		return errors.New("event body is empty")
 
-		if len(e.Body) != 0 {
-			return fmt.Errorf("no body should be sent for method %v", e.Path)
-		}
+	}
 
-		if len(pathParam) != 0 && len(e.QueryStringParameters) != 0 {
-			return fmt.Errorf("sent both path param %v and query string %v",
-				e.Path, e.QueryStringParameters)
-		}
-
+	if slices.Contains([]string{"GET", "DELETE"}, e.HTTPMethod) && len(e.Body) != 0 {
+		return fmt.Errorf("no body should be sent for method %v", e.Path)
 	}
 	/*add back in later
 	if !strings.Contains(e.Headers["Set-Cookie"], "token=") {
 		return errors.New("missing auth cookie")
 	}*/
-
-	if len(e.HTTPMethod) == 0 {
-		return errors.New("no idea what this is")
-	}
 
 	return nil
 }
