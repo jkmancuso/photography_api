@@ -23,6 +23,12 @@ type DBLoginItem struct {
 	Success   bool   `dynamodbav:"success"`
 }
 
+type DBJobItem struct {
+	Id      string `dynamodbav:"id"`
+	JobName string `dynamodbav:"job_name"`
+	JobYear int    `dynamodbav:"job_year"`
+}
+
 func NewDB(table string, cfg aws.Config) (*DBInfo, error) {
 	log.Println("entering NewDB")
 	db := &DBInfo{Tablename: table}

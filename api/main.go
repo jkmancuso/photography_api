@@ -3,32 +3,31 @@ package main
 import (
 	"errors"
 	"log"
+	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/jkmancuso/photography_api/shared"
 )
 
-type handlerFunc func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)
+type handlerFunc func(events.APIGatewayProxyRequest, *dynamodb.Client) (string, int, error)
+
+const MAX_DB_ITEMS = 100
 
 var (
-	/*create all Dynamo connections as Global variables so
-	they are re used during Lambda warm start
-	https://docs.aws.amazon.com/lambda/latest/dg/static-initialization.html
-	*/
-
 	endpointHandlers = map[string]handlerFunc{
-		"/jobs":        jobs,
-		"/groups":      groups,
-		"/pictures":    pictures,
-		"/instruments": instruments,
-		"/orders":      orders}
+		"/jobs": jobs,
+		/*	"/groups":      groups,
+			"/pictures":    pictures,
+			"/instruments": instruments,
+			"/orders":      orders*/}
 
 	// same for aws config
 	awsCfg aws.Config
 
-	//genericError = `{"STATUS":"ERROR"}`
+	genericError = `{"STATUS":"ERROR"}`
 )
 
 func init() {
@@ -55,15 +54,16 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		log.Print(err)
 	}
 
-	return events.APIGatewayProxyResponse{
-		Body:       response.Body,
-		StatusCode: response.StatusCode,
-	}, err
+	return response, err
 }
 
 func routeRequestToHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	response := events.APIGatewayProxyResponse{}
+	response := events.APIGatewayProxyResponse{
+		StatusCode: http.StatusBadRequest,
+		Body:       genericError,
+	}
 
+	// has a leading slash
 	endpoint := shared.GetTargetEndpoint(request.Path)
 
 	if len(endpoint) == 0 {
@@ -78,7 +78,18 @@ func routeRequestToHandler(request events.APIGatewayProxyRequest) (events.APIGat
 		return response, err
 	}
 
-	response, err := endpointHandlers[endpoint](request)
+	// table name is endpoint without the leading slash
+	db, err := shared.NewDB(endpoint[1:], awsCfg)
+
+	if err != nil {
+		response.StatusCode = http.StatusInternalServerError
+		return response, err
+	}
+
+	returnStr, statusCode, err := endpointHandlers[endpoint](request, db.Client)
+
+	response.Body = returnStr
+	response.StatusCode = statusCode
 
 	return response, err
 
