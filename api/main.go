@@ -28,6 +28,7 @@ var (
 	awsCfg aws.Config
 
 	genericError = `{"STATUS":"ERROR"}`
+	genericOK    = `{"STATUS":"OK"}`
 )
 
 func init() {
@@ -63,8 +64,10 @@ func routeRequestToHandler(request events.APIGatewayProxyRequest) (events.APIGat
 		Body:       genericError,
 	}
 
-	// has a leading slash
-	endpoint := shared.GetTargetEndpoint(request.Path)
+	// withLeadingSlash
+	endpoint := shared.GetTargetEndpoint(request.Path, false)
+	// withoutLeadingSlash
+	tableName := shared.GetTargetEndpoint(request.Path, true)
 
 	if len(endpoint) == 0 {
 		return response, fmt.Errorf("invalid api path %v", request.Path)
@@ -80,7 +83,7 @@ func routeRequestToHandler(request events.APIGatewayProxyRequest) (events.APIGat
 	}
 
 	// table name is endpoint without the leading slash
-	db, err := shared.NewDB(endpoint[1:], awsCfg)
+	db, err := shared.NewDB(tableName, awsCfg)
 
 	if err != nil {
 		response.StatusCode = http.StatusInternalServerError

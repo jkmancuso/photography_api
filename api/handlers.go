@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -12,21 +13,57 @@ import (
 )
 
 func jobs(request events.APIGatewayProxyRequest, db *shared.DBInfo) (string, int, error) {
-	var returnStr string
 	var err error
+	var jobItem *shared.DBJobItem
+	var jobItems []*shared.DBJobItem
 
-	switch request.HTTPMethod {
-	case "GET":
-		returnStr, err = getJobs(context.Background(), db)
+	returnBytes := []byte(genericOK)
+
+	ctx := context.Background()
+
+	if request.HTTPMethod == "GET" {
+		jobItems, err = getJobs(ctx, db)
+
+		if err != nil {
+			return genericError, http.StatusInternalServerError, err
+		}
+
+		returnBytes, err = json.Marshal(jobItems)
+	} else if request.HTTPMethod == "POST" {
+		jobItem, err = shared.ParseBodyIntoNewJob(request.Body)
+
+		if err != nil {
+			return genericError, http.StatusInternalServerError, err
+		}
+
+		err = addJob(ctx, db, jobItem)
+	} else {
+		err = fmt.Errorf("HTTP method %v not handled", request.HTTPMethod)
 	}
 
-	return returnStr, http.StatusOK, err
+	if err != nil {
+		return genericError, http.StatusInternalServerError, err
+	}
+
+	return string(returnBytes), http.StatusOK, nil
 }
 
-func getJobs(ctx context.Context, db *shared.DBInfo) (string, error) {
+func addJob(ctx context.Context, db *shared.DBInfo, job *shared.DBJobItem) error {
+
+	item, err := attributevalue.MarshalMap(job)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.AddItem(ctx, item)
+	return err
+}
+
+func getJobs(ctx context.Context, db *shared.DBInfo) ([]*shared.DBJobItem, error) {
 
 	var lek map[string]types.AttributeValue
-	var jobItems []*shared.DBJobItem
+	var items []*shared.DBJobItem
 
 	//add max just in case of inifinte loop, "should break" before then
 	for i := 0; i < MAX_LOOP; i++ {
@@ -36,16 +73,16 @@ func getJobs(ctx context.Context, db *shared.DBInfo) (string, error) {
 		resp, err := db.DoFullScan(ctx, MAX_DB_ITEMS, lek)
 
 		if err != nil {
-			return genericError, err
+			return items, err
 		}
 
 		err = attributevalue.UnmarshalListOfMaps(resp.Items, &jobPage)
 
 		if err != nil {
-			return genericError, err
+			return items, err
 		}
 
-		jobItems = append(jobItems, jobPage...)
+		items = append(items, jobPage...)
 
 		lek = resp.LastEvaluatedKey
 
@@ -54,7 +91,5 @@ func getJobs(ctx context.Context, db *shared.DBInfo) (string, error) {
 		}
 	}
 
-	jobsStr, err := json.Marshal(jobItems)
-
-	return string(jobsStr), err
+	return items, nil
 }
