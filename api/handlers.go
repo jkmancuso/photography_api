@@ -6,8 +6,10 @@ import (
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/jkmancuso/photography_api/shared"
 )
 
@@ -25,29 +27,23 @@ func jobs(request events.APIGatewayProxyRequest, db *shared.DBInfo) (string, int
 
 func getJobs(ctx context.Context, db *shared.DBInfo) (string, error) {
 
-	var jobPage []*shared.DBJobItem
+	var lek map[string]types.AttributeValue
 	var jobItems []*shared.DBJobItem
-	var err error
 
-	//lek := map[string]string{}
+	//add max just in case of inifinte loop, "should break" before then
+	for i := 0; i < MAX_DB_ITEMS; i++ {
 
-	scanInput := dynamodb.ScanInput{
-		TableName: &db.Tablename,
-		//Limit:     aws.Int32(1),
-	}
+		jobPage := []*shared.DBJobItem{}
 
-	scanPaginator := dynamodb.NewScanPaginator(db.Client, &scanInput)
-
-	for scanPaginator.HasMorePages() {
-		resp, err := scanPaginator.NextPage(ctx)
+		resp, err := db.Client.Scan(ctx, &dynamodb.ScanInput{
+			TableName:         &db.Tablename,
+			Limit:             aws.Int32(1),
+			ExclusiveStartKey: lek,
+		})
 
 		if err != nil {
 			return genericError, err
 		}
-
-		//_ = attributevalue.UnmarshalMap(resp.LastEvaluatedKey, &lek)
-
-		//log.Printf("KEY : %+v", lek)
 
 		err = attributevalue.UnmarshalListOfMaps(resp.Items, &jobPage)
 
@@ -56,6 +52,12 @@ func getJobs(ctx context.Context, db *shared.DBInfo) (string, error) {
 		}
 
 		jobItems = append(jobItems, jobPage...)
+
+		lek = resp.LastEvaluatedKey
+
+		if len(lek) == 0 {
+			break
+		}
 	}
 
 	jobsStr, err := json.Marshal(jobItems)
