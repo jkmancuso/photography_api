@@ -24,9 +24,9 @@ type DBLoginItem struct {
 }
 
 type DBJobItem struct {
-	Id      string `dynamodbav:"id"`
-	JobName string `dynamodbav:"job_name"`
-	JobYear int    `dynamodbav:"job_year"`
+	Id      string `dynamodbav:"id" json:"id"`
+	JobName string `dynamodbav:"job_name" json:"job_name"`
+	JobYear int    `dynamodbav:"job_year" json:"job_year"`
 }
 
 func NewDB(table string, cfg aws.Config) (*DBInfo, error) {

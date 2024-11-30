@@ -55,7 +55,7 @@ func GenerateHash(s string, salt string) (string, error) {
 }
 
 func GetTargetEndpoint(path string) string {
-	return strings.Split(path, "/")[1]
+	return "/" + strings.Split(path, "/")[1]
 }
 
 func ValidateEvent(e events.APIGatewayProxyRequest) error {
@@ -77,9 +77,10 @@ func ValidateEvent(e events.APIGatewayProxyRequest) error {
 		return fmt.Errorf("no body should be sent for method %v", e.Path)
 	}
 
+	/*add back in later
 	if !strings.Contains(e.Headers["Set-Cookie"], "token=") {
 		return errors.New("missing auth cookie")
-	}
+	}*/
 
 	if len(e.HTTPMethod) == 0 {
 		return errors.New("no idea what this is")

@@ -1,18 +1,17 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/jkmancuso/photography_api/shared"
 )
 
-type handlerFunc func(events.APIGatewayProxyRequest, *dynamodb.Client) (string, int, error)
+type handlerFunc func(events.APIGatewayProxyRequest, *shared.DBInfo) (string, int, error)
 
 const MAX_DB_ITEMS = 100
 
@@ -67,11 +66,12 @@ func routeRequestToHandler(request events.APIGatewayProxyRequest) (events.APIGat
 	endpoint := shared.GetTargetEndpoint(request.Path)
 
 	if len(endpoint) == 0 {
-		return response, errors.New("invalid api path")
+		return response, fmt.Errorf("invalid api path %v", request.Path)
 	}
 
 	if _, ok := endpointHandlers[endpoint]; !ok {
-		return response, errors.New("no handler for this api path")
+		return response, fmt.Errorf("no handler for api path %v and endpoint %v",
+			request.Path, endpoint)
 	}
 
 	if err := shared.ValidateEvent(request); err != nil {
@@ -86,7 +86,7 @@ func routeRequestToHandler(request events.APIGatewayProxyRequest) (events.APIGat
 		return response, err
 	}
 
-	returnStr, statusCode, err := endpointHandlers[endpoint](request, db.Client)
+	returnStr, statusCode, err := endpointHandlers[endpoint](request, db)
 
 	response.Body = returnStr
 	response.StatusCode = statusCode
