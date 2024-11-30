@@ -1,10 +1,12 @@
 package shared
 
 import (
+	"context"
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
 type DBInfo struct {
@@ -41,4 +43,16 @@ func NewDB(table string, cfg aws.Config) (*DBInfo, error) {
 	db.Client = client
 
 	return db, nil
+}
+
+func (db DBInfo) DoFullScan(ctx context.Context, limit int32, lek map[string]types.AttributeValue) (*dynamodb.ScanOutput, error) {
+
+	resp, err := db.Client.Scan(ctx, &dynamodb.ScanInput{
+		TableName:         &db.Tablename,
+		Limit:             aws.Int32(limit),
+		ExclusiveStartKey: lek,
+	})
+
+	return resp, err
+
 }

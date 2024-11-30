@@ -14,6 +14,7 @@ import (
 type handlerFunc func(events.APIGatewayProxyRequest, *shared.DBInfo) (string, int, error)
 
 const MAX_DB_ITEMS = 100
+const MAX_LOOP = 100
 
 var (
 	endpointHandlers = map[string]handlerFunc{

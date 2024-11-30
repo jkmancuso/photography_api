@@ -6,9 +6,7 @@ import (
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/jkmancuso/photography_api/shared"
 )
@@ -31,15 +29,11 @@ func getJobs(ctx context.Context, db *shared.DBInfo) (string, error) {
 	var jobItems []*shared.DBJobItem
 
 	//add max just in case of inifinte loop, "should break" before then
-	for i := 0; i < MAX_DB_ITEMS; i++ {
+	for i := 0; i < MAX_LOOP; i++ {
 
 		jobPage := []*shared.DBJobItem{}
 
-		resp, err := db.Client.Scan(ctx, &dynamodb.ScanInput{
-			TableName:         &db.Tablename,
-			Limit:             aws.Int32(1),
-			ExclusiveStartKey: lek,
-		})
+		resp, err := db.DoFullScan(ctx, MAX_DB_ITEMS, lek)
 
 		if err != nil {
 			return genericError, err
