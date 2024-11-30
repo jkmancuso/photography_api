@@ -2,6 +2,8 @@ package shared
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -45,6 +47,12 @@ func NewDB(table string, cfg aws.Config) (*DBInfo, error) {
 	return db, nil
 }
 
+func NewJobItem() *DBJobItem {
+	return &DBJobItem{
+		Id: GenerateUUID(),
+	}
+}
+
 func (db DBInfo) DoFullScan(ctx context.Context, limit int32, lek map[string]types.AttributeValue) (*dynamodb.ScanOutput, error) {
 
 	resp, err := db.Client.Scan(ctx, &dynamodb.ScanInput{
@@ -55,4 +63,25 @@ func (db DBInfo) DoFullScan(ctx context.Context, limit int32, lek map[string]typ
 
 	return resp, err
 
+}
+
+func (db DBInfo) AddItem(ctx context.Context, item map[string]types.AttributeValue) error {
+
+	_, err := db.Client.PutItem(ctx, &dynamodb.PutItemInput{
+		TableName: &db.Tablename,
+		Item:      item,
+	})
+
+	return err
+}
+
+func ParseBodyIntoNewJob(body string) (*DBJobItem, error) {
+	jobItem := NewJobItem()
+	err := json.Unmarshal([]byte(body), jobItem)
+
+	if len(jobItem.JobName) == 0 || jobItem.JobYear == 0 {
+		err = errors.New("missing field in body")
+	}
+
+	return jobItem, err
 }

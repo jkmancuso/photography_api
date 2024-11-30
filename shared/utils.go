@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/google/uuid"
 )
 
 type SimpleLogin struct {
@@ -54,15 +55,21 @@ func GenerateHash(s string, salt string) (string, error) {
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
-func GetTargetEndpoint(path string) string {
-	return "/" + strings.Split(path, "/")[1]
+func GetTargetEndpoint(path string, withoutLeadingSlash bool) string {
+	resultStr := strings.Split(path, "/")[1]
+
+	if withoutLeadingSlash {
+		return resultStr
+	}
+
+	return "/" + resultStr
 }
 
 func ValidateEvent(e events.APIGatewayProxyRequest) error {
 
-	if slices.Contains([]string{"POST", "PATCH"}, e.HTTPMethod) {
+	pathParam := strings.Split(e.Path, "/")[2]
 
-		pathParam := strings.Split(e.Path, "/")[2]
+	if slices.Contains([]string{"POST", "PATCH"}, e.HTTPMethod) {
 
 		if len(pathParam) == 0 {
 			return fmt.Errorf("missing path param for method %v", e.Path)
@@ -73,10 +80,18 @@ func ValidateEvent(e events.APIGatewayProxyRequest) error {
 		}
 	}
 
-	if slices.Contains([]string{"GET", "DELETE"}, e.HTTPMethod) && len(e.Body) != 0 {
-		return fmt.Errorf("no body should be sent for method %v", e.Path)
-	}
+	if slices.Contains([]string{"GET", "DELETE"}, e.HTTPMethod) {
 
+		if len(e.Body) != 0 {
+			return fmt.Errorf("no body should be sent for method %v", e.Path)
+		}
+
+		if len(pathParam) != 0 && len(e.QueryStringParameters) != 0 {
+			return fmt.Errorf("sent both path param %v and query string %v",
+				e.Path, e.QueryStringParameters)
+		}
+
+	}
 	/*add back in later
 	if !strings.Contains(e.Headers["Set-Cookie"], "token=") {
 		return errors.New("missing auth cookie")
@@ -87,4 +102,9 @@ func ValidateEvent(e events.APIGatewayProxyRequest) error {
 	}
 
 	return nil
+}
+
+func GenerateUUID() string {
+	id, _ := uuid.NewV7()
+	return id.String()
 }
