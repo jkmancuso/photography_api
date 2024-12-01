@@ -20,10 +20,10 @@ func addJob(ctx context.Context, db *shared.DBInfo, job *shared.DBJobItem) error
 	return err
 }
 
-func deleteJob(ctx context.Context, db *shared.DBInfo, id string) error {
+func deleteJob(ctx context.Context, db *shared.DBInfo, id string) (int, error) {
 
-	err := db.DeleteItem(ctx, id)
-	return err
+	count, err := db.DeleteItem(ctx, id)
+	return count, err
 }
 
 func getJobs(ctx context.Context, db *shared.DBInfo) ([]*shared.DBJobItem, int, error) {
