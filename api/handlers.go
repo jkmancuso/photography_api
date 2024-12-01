@@ -27,6 +27,31 @@ func getJobsHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func deleteJobHandler(w http.ResponseWriter, r *http.Request) {
+
+	id := r.PathValue("id")
+
+	if len(id) == 0 {
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id cannot be empty"})
+		return
+	}
+
+	if _, err := strconv.Atoi(id); err != nil {
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id needs to be an int"})
+		return
+	}
+
+	err := deleteJob(context.Background(), tableMap["jobs"], id)
+
+	if err != nil {
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
+	}
+
+	json.NewEncoder(w).Encode(shared.GenericMsg{Message: "OK"})
+
+}
+
 func getJobsByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
@@ -44,7 +69,7 @@ func getJobsByIdHandler(w http.ResponseWriter, r *http.Request) {
 	item, count, err := getJobById(context.Background(), tableMap["jobs"], id)
 
 	if err != nil {
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "Error"})
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 		return
 	}
 

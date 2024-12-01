@@ -94,6 +94,24 @@ func (db DBInfo) GetItem(ctx context.Context, idStr string) (*dynamodb.GetItemOu
 	return resp, err
 }
 
+func (db DBInfo) DeleteItem(ctx context.Context, idStr string) error {
+
+	id, err := attributevalue.Marshal(idStr)
+
+	if err != nil {
+		return err
+	}
+
+	key := map[string]types.AttributeValue{"id": id}
+
+	_, err = db.Client.DeleteItem(ctx, &dynamodb.DeleteItemInput{
+		TableName: &db.Tablename,
+		Key:       key,
+	})
+
+	return err
+}
+
 func ParseBodyIntoNewJob(body []byte) (*DBJobItem, error) {
 	jobItem := NewJobItem()
 	err := json.Unmarshal(body, jobItem)
