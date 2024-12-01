@@ -98,7 +98,7 @@ func addJobsHandler(w http.ResponseWriter, r *http.Request) {
 	err = addJob(context.Background(), tableMap["jobs"], jobItem)
 
 	if err != nil {
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "Error"})
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 	}
 
 	json.NewEncoder(w).Encode(jobItem)
