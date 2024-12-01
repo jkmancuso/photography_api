@@ -93,3 +93,20 @@ func getJobs(ctx context.Context, db *shared.DBInfo) ([]*shared.DBJobItem, error
 
 	return items, nil
 }
+
+func getJobById(ctx context.Context, db *shared.DBInfo, id string) (*shared.DBJobItem, error) {
+
+	jobItem := &shared.DBJobItem{}
+
+	resp, err := db.GetItem(ctx, id)
+
+	if err != nil {
+		return jobItem, err
+	}
+
+	if err = attributevalue.UnmarshalMap(resp.Item, jobItem); err != nil {
+		return jobItem, err
+	}
+
+	return jobItem, nil
+}
