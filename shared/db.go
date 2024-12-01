@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
@@ -73,6 +74,24 @@ func (db DBInfo) AddItem(ctx context.Context, item map[string]types.AttributeVal
 	})
 
 	return err
+}
+
+func (db DBInfo) GetItem(ctx context.Context, idStr string) (*dynamodb.GetItemOutput, error) {
+
+	id, err := attributevalue.Marshal(idStr)
+
+	if err != nil {
+		return &dynamodb.GetItemOutput{}, err
+	}
+
+	key := map[string]types.AttributeValue{"id": id}
+
+	resp, err := db.Client.GetItem(ctx, &dynamodb.GetItemInput{
+		TableName: &db.Tablename,
+		Key:       key,
+	})
+
+	return resp, err
 }
 
 func ParseBodyIntoNewJob(body string) (*DBJobItem, error) {

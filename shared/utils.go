@@ -75,7 +75,7 @@ func ValidateEvent(e events.APIGatewayProxyRequest) error {
 
 	}
 
-	if slices.Contains([]string{"GET", "DELETE"}, e.HTTPMethod) && len(e.Body) != 0 {
+	if slices.Contains([]string{"GET"}, e.HTTPMethod) && len(e.Body) != 0 {
 		return fmt.Errorf("no body should be sent for method %v", e.Path)
 	}
 	/*add back in later
