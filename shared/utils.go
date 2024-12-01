@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net/mail"
-	"slices"
-	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/google/uuid"
@@ -52,38 +50,6 @@ func GenerateHash(s string, salt string) (string, error) {
 	h := sha512.New()
 	h.Write([]byte(s + salt))
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
-}
-
-func GetTargetEndpoint(path string, withoutLeadingSlash bool) string {
-	resultStr := strings.Split(path, "/")[1]
-
-	if withoutLeadingSlash {
-		return resultStr
-	}
-
-	return "/" + resultStr
-}
-
-func ValidateEvent(e events.APIGatewayProxyRequest) error {
-
-	if len(e.HTTPMethod) == 0 {
-		return errors.New("no idea what this is")
-	}
-
-	if slices.Contains([]string{"POST", "PATCH"}, e.HTTPMethod) && len(e.Body) == 0 {
-		return errors.New("event body is empty")
-
-	}
-
-	if slices.Contains([]string{"GET"}, e.HTTPMethod) && len(e.Body) != 0 {
-		return fmt.Errorf("no body should be sent for method %v", e.Path)
-	}
-	/*add back in later
-	if !strings.Contains(e.Headers["Set-Cookie"], "token=") {
-		return errors.New("missing auth cookie")
-	}*/
-
-	return nil
 }
 
 func GenerateUUID() string {

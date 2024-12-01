@@ -3,110 +3,79 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"io"
 	"net/http"
+	"strconv"
 
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/jkmancuso/photography_api/shared"
 )
 
-func jobs(request events.APIGatewayProxyRequest, db *shared.DBInfo) (string, int, error) {
-	var err error
-	var jobItem *shared.DBJobItem
-	var jobItems []*shared.DBJobItem
-
-	returnBytes := []byte(genericOK)
-
-	ctx := context.Background()
-
-	if request.HTTPMethod == "GET" {
-		jobItems, err = getJobs(ctx, db)
-
-		if err != nil {
-			return genericError, http.StatusInternalServerError, err
-		}
-
-		returnBytes, err = json.Marshal(jobItems)
-	} else if request.HTTPMethod == "POST" {
-		jobItem, err = shared.ParseBodyIntoNewJob(request.Body)
-
-		if err != nil {
-			return genericError, http.StatusInternalServerError, err
-		}
-
-		err = addJob(ctx, db, jobItem)
-	} else {
-		err = fmt.Errorf("HTTP method %v not handled", request.HTTPMethod)
-	}
+func getJobsHandler(w http.ResponseWriter, r *http.Request) {
+	items, count, err := getJobs(context.Background(), tableMap["jobs"])
 
 	if err != nil {
-		return genericError, http.StatusInternalServerError, err
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "Error"})
+		return
 	}
 
-	return string(returnBytes), http.StatusOK, nil
+	if count == 0 {
+		json.NewEncoder(w).Encode(struct{}{})
+		return
+	}
+
+	json.NewEncoder(w).Encode(items)
+
 }
 
-func addJob(ctx context.Context, db *shared.DBInfo, job *shared.DBJobItem) error {
+func getJobsByIdHandler(w http.ResponseWriter, r *http.Request) {
 
-	item, err := attributevalue.MarshalMap(job)
+	id := r.PathValue("id")
+
+	if len(id) == 0 {
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id cannot be empty"})
+		return
+	}
+
+	if _, err := strconv.Atoi(id); err != nil {
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id needs to be an int"})
+		return
+	}
+
+	item, count, err := getJobById(context.Background(), tableMap["jobs"], id)
 
 	if err != nil {
-		return err
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "Error"})
+		return
 	}
 
-	err = db.AddItem(ctx, item)
-	return err
-}
-
-func getJobs(ctx context.Context, db *shared.DBInfo) ([]*shared.DBJobItem, error) {
-
-	var lek map[string]types.AttributeValue
-	var items []*shared.DBJobItem
-
-	//add max just in case of inifinte loop, "should break" before then
-	for i := 0; i < MAX_LOOP; i++ {
-
-		jobPage := []*shared.DBJobItem{}
-
-		resp, err := db.DoFullScan(ctx, MAX_DB_ITEMS, lek)
-
-		if err != nil {
-			return items, err
-		}
-
-		err = attributevalue.UnmarshalListOfMaps(resp.Items, &jobPage)
-
-		if err != nil {
-			return items, err
-		}
-
-		items = append(items, jobPage...)
-
-		lek = resp.LastEvaluatedKey
-
-		if len(lek) == 0 {
-			break
-		}
+	if count == 0 {
+		json.NewEncoder(w).Encode(struct{}{})
+		return
 	}
 
-	return items, nil
+	json.NewEncoder(w).Encode(item)
+
 }
 
-func getJobById(ctx context.Context, db *shared.DBInfo, id string) (*shared.DBJobItem, error) {
-
-	jobItem := &shared.DBJobItem{}
-
-	resp, err := db.GetItem(ctx, id)
+func addJobsHandler(w http.ResponseWriter, r *http.Request) {
+	bytesBody, err := io.ReadAll(r.Body)
 
 	if err != nil {
-		return jobItem, err
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 	}
 
-	if err = attributevalue.UnmarshalMap(resp.Item, jobItem); err != nil {
-		return jobItem, err
+	jobItem, err := shared.ParseBodyIntoNewJob(bytesBody)
+
+	if err != nil {
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 	}
 
-	return jobItem, nil
+	err = addJob(context.Background(), tableMap["jobs"], jobItem)
+
+	if err != nil {
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "Error"})
+	}
+
+	json.NewEncoder(w).Encode(jobItem)
+
 }

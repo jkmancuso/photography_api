@@ -94,9 +94,9 @@ func (db DBInfo) GetItem(ctx context.Context, idStr string) (*dynamodb.GetItemOu
 	return resp, err
 }
 
-func ParseBodyIntoNewJob(body string) (*DBJobItem, error) {
+func ParseBodyIntoNewJob(body []byte) (*DBJobItem, error) {
 	jobItem := NewJobItem()
-	err := json.Unmarshal([]byte(body), jobItem)
+	err := json.Unmarshal(body, jobItem)
 
 	if len(jobItem.JobName) == 0 || jobItem.JobYear == 0 {
 		err = errors.New("missing field in body")
