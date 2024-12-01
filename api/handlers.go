@@ -14,7 +14,7 @@ func getJobsHandler(w http.ResponseWriter, r *http.Request) {
 	items, count, err := getJobs(context.Background(), tableMap["jobs"])
 
 	if err != nil {
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "Error"})
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 		return
 	}
 
