@@ -12,6 +12,9 @@ import (
 	"github.com/jkmancuso/photography_api/shared"
 )
 
+/* These global variables initialized below should already
+be available on lambda warm start saving on startup resource*/
+
 const MAX_DB_ITEMS = 100
 const MAX_LOOP = 100
 
