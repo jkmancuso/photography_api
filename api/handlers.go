@@ -10,8 +10,13 @@ import (
 	"github.com/jkmancuso/photography_api/shared"
 )
 
-func getJobsHandler(w http.ResponseWriter, r *http.Request) {
-	items, count, err := getJobs(context.Background(), tableMap["jobs"])
+type handlerDBConn struct {
+	dbInfo *shared.DBInfo
+}
+
+func (h handlerDBConn) getJobsHandler(w http.ResponseWriter, r *http.Request) {
+
+	items, count, err := getJobs(context.Background(), h.dbInfo)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -21,7 +26,7 @@ func getJobsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if count == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id not found"})
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "no jobs found"})
 		return
 	}
 
@@ -29,7 +34,7 @@ func getJobsHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func deleteJobHandler(w http.ResponseWriter, r *http.Request) {
+func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
 
@@ -45,7 +50,7 @@ func deleteJobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	count, err := deleteJob(context.Background(), tableMap["jobs"], id)
+	count, err := deleteJob(context.Background(), h.dbInfo, id)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -63,7 +68,7 @@ func deleteJobHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func getJobsByIdHandler(w http.ResponseWriter, r *http.Request) {
+func (h handlerDBConn) getJobsByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
 
@@ -79,7 +84,7 @@ func getJobsByIdHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item, count, err := getJobById(context.Background(), tableMap["jobs"], id)
+	item, count, err := getJobById(context.Background(), h.dbInfo, id)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -97,8 +102,9 @@ func getJobsByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func addJobsHandler(w http.ResponseWriter, r *http.Request) {
+func (h handlerDBConn) addJobsHandler(w http.ResponseWriter, r *http.Request) {
 	bytesBody, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -112,7 +118,7 @@ func addJobsHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 	}
 
-	err = addJob(context.Background(), tableMap["jobs"], jobItem)
+	err = addJob(context.Background(), h.dbInfo, jobItem)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

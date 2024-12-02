@@ -12,10 +12,17 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
+type DynamoClientInterface interface {
+	Scan(context.Context, *dynamodb.ScanInput, ...func(*dynamodb.Options)) (*dynamodb.ScanOutput, error)
+	PutItem(context.Context, *dynamodb.PutItemInput, ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error)
+	GetItem(context.Context, *dynamodb.GetItemInput, ...func(*dynamodb.Options)) (*dynamodb.GetItemOutput, error)
+	DeleteItem(context.Context, *dynamodb.DeleteItemInput, ...func(*dynamodb.Options)) (*dynamodb.DeleteItemOutput, error)
+}
+
 type DBInfo struct {
 	Tablename string
 	Cfg       aws.Config
-	Client    *dynamodb.Client
+	Client    DynamoClientInterface
 }
 
 type DBAdminItem struct {
@@ -35,12 +42,10 @@ type DBJobItem struct {
 }
 
 func NewDB(table string, cfg aws.Config) (*DBInfo, error) {
-	log.Println("entering NewDB")
+
 	db := &DBInfo{Tablename: table}
 
 	client := dynamodb.NewFromConfig(cfg)
-
-	log.Printf("Client created success")
 
 	db.Cfg = cfg
 	db.Client = client

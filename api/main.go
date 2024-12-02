@@ -26,23 +26,33 @@ var (
 
 func init() {
 
-	setupRoutes()
 	var err error
 
-	awsCfg, err = shared.NewAWSCfg()
+	if len(awsCfg.Region) == 0 {
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, name := range tables {
-		db, err := shared.NewDB(name, awsCfg)
+		log.Println("loading new config from cold start")
+		awsCfg, err = shared.NewAWSCfg()
 
 		if err != nil {
 			log.Fatal(err)
 		}
-		tableMap[name] = db
 	}
+
+	if len(tableMap) == 0 {
+		log.Println("loading new DB connections from cold start")
+
+		for _, name := range tables {
+			db, err := shared.NewDB(name, awsCfg)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			tableMap[name] = db
+		}
+	}
+
+	setupRoutes()
 
 	httpLambda = httpadapter.New(http.DefaultServeMux)
 
