@@ -21,7 +21,6 @@ type DynamoClientInterface interface {
 
 type DBInfo struct {
 	Tablename string
-	Cfg       aws.Config
 	Client    DynamoClientInterface
 }
 
@@ -44,10 +43,7 @@ type DBJobItem struct {
 func NewDB(table string, cfg aws.Config) (*DBInfo, error) {
 
 	db := &DBInfo{Tablename: table}
-
 	client := dynamodb.NewFromConfig(cfg)
-
-	db.Cfg = cfg
 	db.Client = client
 
 	return db, nil
