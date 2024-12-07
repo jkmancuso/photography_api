@@ -17,26 +17,32 @@ const VALID_ID = "26e9a998-2e16-44df-96e9-76520b6a22d8"
 const MISSING_ID = "c0fd7513-39b4-404a-9b6b-26b00e8369ab"
 const INVALID_UUID = "123456789"
 
-var tests = []struct {
-	name           string
-	id             string
-	wantStatusCode int
-	wantErrorMsg   shared.GenericMsg
-}{
-	{"check valid id", VALID_ID, 200, shared.NO_ERR},
-	{"check missing id", MISSING_ID, 400, shared.ID_NOT_FOUND},
-	{"check invalid uuid", INVALID_UUID, 400, shared.ID_NOT_IN_UUID_FORMAT},
-}
+var (
+	tests = []struct {
+		name           string
+		id             string
+		wantStatusCode int
+		wantErrorMsg   shared.GenericMsg
+	}{
+		{"check valid id", VALID_ID, 200, shared.NO_ERR},
+		{"check missing id", MISSING_ID, 400, shared.ID_NOT_FOUND},
+		{"check invalid uuid", INVALID_UUID, 400, shared.ID_NOT_IN_UUID_FORMAT},
+	}
 
-func TestGetJobById(t *testing.T) {
+	mux                    http.ServeMux
+	mock                   shared.DynamoClientMock
+	id, job_name, job_year types.AttributeValue
+	jobsDBConn             handlerDBConn
+)
 
-	mux := http.NewServeMux()
+func setupTest() {
+	mux = *http.NewServeMux()
 
-	id, _ := attributevalue.Marshal(VALID_ID)
-	job_name, _ := attributevalue.Marshal("mockedup_row")
-	job_year, _ := attributevalue.Marshal(2025)
+	id, _ = attributevalue.Marshal(VALID_ID)
+	job_name, _ = attributevalue.Marshal("mockedup_row")
+	job_year, _ = attributevalue.Marshal(2025)
 
-	mock := shared.DynamoClientMock{
+	mock = shared.DynamoClientMock{
 		MockedRow: map[string]types.AttributeValue{
 			"id":       id,
 			"job_name": job_name,
@@ -44,12 +50,17 @@ func TestGetJobById(t *testing.T) {
 		},
 	}
 
-	jobsDBConn := handlerDBConn{
+	jobsDBConn = handlerDBConn{
 		dbInfo: &shared.DBInfo{
 			Tablename: "jobs",
 			Client:    mock,
 		},
 	}
+
+}
+func TestGetJobById(t *testing.T) {
+
+	setupTest()
 
 	mux.HandleFunc("/jobs/{id}", jobsDBConn.getJobsByIdHandler)
 
