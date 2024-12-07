@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -13,14 +14,17 @@ import (
 
 // just random generate, nothing special
 const VALID_ID = "26e9a998-2e16-44df-96e9-76520b6a22d8"
-const INVALID_ID = "c0fd7513-39b4-404a-9b6b-26b00e8369ab"
+const MISSING_ID = "c0fd7513-39b4-404a-9b6b-26b00e8369ab"
+const INVALID_UUID = "123456789"
 
 var tests = []struct {
 	id             string
 	wantStatusCode int
+	wantErrorMsg   shared.GenericMsg
 }{
-	{VALID_ID, 200},
-	{INVALID_ID, 400},
+	{VALID_ID, 200, shared.NO_ERR},
+	{MISSING_ID, 400, shared.ID_NOT_FOUND},
+	{INVALID_UUID, 400, shared.ID_NOT_IN_UUID_FORMAT},
 }
 
 func TestGetJobById(t *testing.T) {
@@ -60,8 +64,18 @@ func TestGetJobById(t *testing.T) {
 		mux.ServeHTTP(respRecorder, req)
 
 		if tt.wantStatusCode != respRecorder.Code {
-			t.Errorf("%v: Got wrong response code %d, wanted %d",
+			t.Errorf("%s: Got wrong response code %d, wanted %d",
 				tt.id, respRecorder.Code, tt.wantStatusCode)
+		}
+
+		if respRecorder.Result().StatusCode != http.StatusOK {
+			gotMsg := shared.GenericMsg{}
+			_ = json.Unmarshal(respRecorder.Body.Bytes(), &gotMsg)
+
+			if gotMsg.Message != tt.wantErrorMsg.Message {
+				t.Errorf("%s: Got wrong err msg %s, wanted %s",
+					tt.id, respRecorder.Body.String(), tt.wantErrorMsg.Message)
+			}
 		}
 	}
 
