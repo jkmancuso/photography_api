@@ -66,7 +66,7 @@ func (h handlerDBConn) getOrdersByIdHandler(w http.ResponseWriter, r *http.Reque
 	k := "id"
 	v := id
 
-	item, count, err := getOrderByGSI(context.Background(), h.dbInfo, k, v)
+	item, count, err := getOrderByGSI(context.Background(), h.dbInfo, k, v, h.dbInfo.GSI)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

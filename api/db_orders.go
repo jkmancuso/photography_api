@@ -10,12 +10,12 @@ import (
 
 // Global secondary index supports Query, not GetItem
 // id is your GSI
-func getOrderByGSI(ctx context.Context, db *shared.DBInfo, k string, v string) (*shared.DBOrderItem, int, error) {
+func getOrderByGSI(ctx context.Context, db *shared.DBInfo, k string, v string, gsi string) (*shared.DBOrderItem, int, error) {
 
 	orderItem := &shared.DBOrderItem{}
 	orderItems := []shared.DBOrderItem{}
 
-	resp, err := db.QueryItem(ctx, k, v)
+	resp, err := db.QueryItem(ctx, k, v, gsi)
 
 	if err != nil {
 		return orderItem, 0, err
