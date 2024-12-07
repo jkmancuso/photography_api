@@ -16,6 +16,7 @@ import (
 type DBInfo struct {
 	Tablename string
 	Client    DynamoClientInterface
+	GSI       string //optinal global secondary index
 }
 
 type DBAdminItem struct {
@@ -94,7 +95,7 @@ func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeVal
 	return resp, err
 }
 
-func (db DBInfo) QueryItem(ctx context.Context, k string, v string) (*dynamodb.QueryOutput, error) {
+func (db DBInfo) QueryItem(ctx context.Context, k string, v string, gsi string) (*dynamodb.QueryOutput, error) {
 
 	keyEx := expression.Key(k).Equal(expression.Value(v))
 	expr, err := expression.NewBuilder().WithKeyCondition(keyEx).Build()
@@ -103,14 +104,15 @@ func (db DBInfo) QueryItem(ctx context.Context, k string, v string) (*dynamodb.Q
 		log.Printf("Couldn't build expression for query. Here's why: %v\n", err)
 	}
 
-	gsi := "id-index"
-
 	input := &dynamodb.QueryInput{
 		TableName:                 &db.Tablename,
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		KeyConditionExpression:    expr.KeyCondition(),
-		IndexName:                 &gsi,
+	}
+
+	if len(gsi) != 0 {
+		input.IndexName = &gsi
 	}
 
 	resp, err := db.Client.Query(ctx, input)
