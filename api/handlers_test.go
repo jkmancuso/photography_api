@@ -18,17 +18,7 @@ const MISSING_ID = "c0fd7513-39b4-404a-9b6b-26b00e8369ab"
 const INVALID_UUID = "123456789"
 
 var (
-	tests = []struct {
-		name           string
-		id             string
-		wantStatusCode int
-		wantErrorMsg   shared.GenericMsg
-	}{
-		{"check valid id", VALID_ID, 200, shared.NO_ERR},
-		{"check missing id", MISSING_ID, 400, shared.ID_NOT_FOUND},
-		{"check invalid uuid", INVALID_UUID, 400, shared.ID_NOT_IN_UUID_FORMAT},
-	}
-
+	tests                  []shared.GenericTest
 	mux                    http.ServeMux
 	mock                   shared.DynamoClientMock
 	id, job_name, job_year types.AttributeValue
@@ -37,6 +27,27 @@ var (
 
 func setupTest() {
 	mux = *http.NewServeMux()
+
+	tests = []shared.GenericTest{
+		{
+			Name:           "check valid id",
+			Id:             VALID_ID,
+			WantStatusCode: 200,
+			WantErrorMsg:   shared.NO_ERR,
+		},
+		{
+			Name:           "check missing id",
+			Id:             MISSING_ID,
+			WantStatusCode: 400,
+			WantErrorMsg:   shared.ID_NOT_FOUND,
+		},
+		{
+			Name:           "check invalid uuid",
+			Id:             INVALID_UUID,
+			WantStatusCode: 400,
+			WantErrorMsg:   shared.ID_NOT_IN_UUID_FORMAT,
+		},
+	}
 
 	id, _ = attributevalue.Marshal(VALID_ID)
 	job_name, _ = attributevalue.Marshal("mockedup_row")
@@ -66,10 +77,10 @@ func TestGetJobById(t *testing.T) {
 
 	for _, tt := range tests {
 
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.Name, func(t *testing.T) {
 			respRecorder := httptest.NewRecorder()
 
-			req, err := http.NewRequest("GET", fmt.Sprintf("/jobs/%s", tt.id), nil)
+			req, err := http.NewRequest("GET", fmt.Sprintf("/jobs/%s", tt.Id), nil)
 
 			if err != nil {
 				t.Fatal(err)
@@ -77,18 +88,18 @@ func TestGetJobById(t *testing.T) {
 
 			mux.ServeHTTP(respRecorder, req)
 
-			if tt.wantStatusCode != respRecorder.Code {
+			if tt.WantStatusCode != respRecorder.Code {
 				t.Errorf("%s: Got wrong response code %d, wanted %d",
-					tt.id, respRecorder.Code, tt.wantStatusCode)
+					tt.Id, respRecorder.Code, tt.WantStatusCode)
 			}
 
 			if respRecorder.Result().StatusCode != http.StatusOK {
 				gotMsg := shared.GenericMsg{}
 				_ = json.Unmarshal(respRecorder.Body.Bytes(), &gotMsg)
 
-				if gotMsg.Message != tt.wantErrorMsg.Message {
+				if gotMsg.Message != tt.WantErrorMsg.Message {
 					t.Errorf("%s: Got wrong err msg %s, wanted %s",
-						tt.id, respRecorder.Body.String(), tt.wantErrorMsg.Message)
+						tt.Id, respRecorder.Body.String(), tt.WantErrorMsg.Message)
 				}
 			}
 		})
