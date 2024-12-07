@@ -7,3 +7,10 @@ var ID_NOT_IN_UUID_FORMAT = GenericMsg{Message: "id needs to be in uuid format"}
 type GenericMsg struct {
 	Message string `json:"message"`
 }
+
+type GenericTest struct {
+	Name           string
+	Id             string
+	WantStatusCode int
+	WantErrorMsg   GenericMsg
+}
