@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
@@ -31,6 +32,12 @@ type DBJobItem struct {
 	Id      string `dynamodbav:"id" json:"id"`
 	JobName string `dynamodbav:"job_name" json:"job_name"`
 	JobYear int    `dynamodbav:"job_year" json:"job_year"`
+}
+
+type DBOrderItem struct {
+	Id        string `dynamodbav:"id" json:"id"`
+	JobId     string `dynamodbav:"job_id" json:"job_id"`
+	RecordNum int    `dynamodbav:"record_num" json:"record_num"`
 }
 
 func NewDB(table string, cfg aws.Config) (*DBInfo, error) {
@@ -70,20 +77,48 @@ func (db DBInfo) AddItem(ctx context.Context, item map[string]types.AttributeVal
 	return err
 }
 
-func (db DBInfo) GetItem(ctx context.Context, idStr string) (*dynamodb.GetItemOutput, error) {
+func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeValue) (*dynamodb.GetItemOutput, error) {
 
-	id, err := attributevalue.Marshal(idStr)
-
-	if err != nil {
-		return &dynamodb.GetItemOutput{}, err
+	input := &dynamodb.GetItemInput{
+		TableName: &db.Tablename,
+		Key:       pKey,
 	}
 
-	key := map[string]types.AttributeValue{"id": id}
+	resp, err := db.Client.GetItem(ctx, input)
 
-	resp, err := db.Client.GetItem(ctx, &dynamodb.GetItemInput{
-		TableName: &db.Tablename,
-		Key:       key,
-	})
+	if err != nil {
+		log.Println(err)
+		log.Printf("Table: %v", *input.TableName)
+	}
+
+	return resp, err
+}
+
+func (db DBInfo) QueryItem(ctx context.Context, k string, v string) (*dynamodb.QueryOutput, error) {
+
+	keyEx := expression.Key(k).Equal(expression.Value(v))
+	expr, err := expression.NewBuilder().WithKeyCondition(keyEx).Build()
+
+	if err != nil {
+		log.Printf("Couldn't build expression for query. Here's why: %v\n", err)
+	}
+
+	gsi := "id-index"
+
+	input := &dynamodb.QueryInput{
+		TableName:                 &db.Tablename,
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		KeyConditionExpression:    expr.KeyCondition(),
+		IndexName:                 &gsi,
+	}
+
+	resp, err := db.Client.Query(ctx, input)
+
+	if err != nil {
+		log.Println(err)
+		log.Printf("Table: %v", *input.TableName)
+	}
 
 	return resp, err
 }

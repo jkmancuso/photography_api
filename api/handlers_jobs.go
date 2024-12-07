@@ -7,12 +7,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/jkmancuso/photography_api/shared"
 )
-
-type handlerDBConn struct {
-	dbInfo *shared.DBInfo
-}
 
 func (h handlerDBConn) getJobsHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -84,7 +82,10 @@ func (h handlerDBConn) getJobsByIdHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	item, count, err := getJobById(context.Background(), h.dbInfo, id)
+	idVal, _ := attributevalue.Marshal(id)
+	pKey := map[string]types.AttributeValue{"id": idVal}
+
+	item, count, err := getJobById(context.Background(), h.dbInfo, pKey)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

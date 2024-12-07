@@ -60,11 +60,11 @@ func getJobs(ctx context.Context, db *shared.DBInfo) ([]*shared.DBJobItem, int, 
 	return items, len(items), nil
 }
 
-func getJobById(ctx context.Context, db *shared.DBInfo, id string) (*shared.DBJobItem, int, error) {
+func getJobById(ctx context.Context, db *shared.DBInfo, pKey map[string]types.AttributeValue) (*shared.DBJobItem, int, error) {
 
 	jobItem := &shared.DBJobItem{}
 
-	resp, err := db.GetItem(ctx, id)
+	resp, err := db.GetItem(ctx, pKey)
 
 	if err != nil {
 		return jobItem, 0, err
