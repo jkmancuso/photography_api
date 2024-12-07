@@ -21,7 +21,9 @@ type DynamoClientMock struct {
 }
 
 func (client DynamoClientMock) Scan(ctx context.Context, input *dynamodb.ScanInput, opts ...func(*dynamodb.Options)) (*dynamodb.ScanOutput, error) {
-	return &dynamodb.ScanOutput{}, nil
+	return &dynamodb.ScanOutput{
+		Items: []map[string]types.AttributeValue{client.MockedRow},
+	}, nil
 }
 
 func (client DynamoClientMock) PutItem(ctx context.Context, input *dynamodb.PutItemInput, opts ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error) {

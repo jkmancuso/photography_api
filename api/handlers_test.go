@@ -19,35 +19,14 @@ const INVALID_UUID = "123456789"
 
 var (
 	tests                  []shared.GenericTest
-	mux                    http.ServeMux
 	mock                   shared.DynamoClientMock
 	id, job_name, job_year types.AttributeValue
 	jobsDBConn             handlerDBConn
 )
 
-func setupTest() {
-	mux = *http.NewServeMux()
+var mux = *http.NewServeMux()
 
-	tests = []shared.GenericTest{
-		{
-			Name:           "check valid id",
-			Id:             VALID_ID,
-			WantStatusCode: 200,
-			WantErrorMsg:   shared.NO_ERR,
-		},
-		{
-			Name:           "check missing id",
-			Id:             MISSING_ID,
-			WantStatusCode: 400,
-			WantErrorMsg:   shared.ID_NOT_FOUND,
-		},
-		{
-			Name:           "check invalid uuid",
-			Id:             INVALID_UUID,
-			WantStatusCode: 400,
-			WantErrorMsg:   shared.ID_NOT_IN_UUID_FORMAT,
-		},
-	}
+func setupMock() {
 
 	id, _ = attributevalue.Marshal(VALID_ID)
 	job_name, _ = attributevalue.Marshal("mockedup_row")
@@ -67,11 +46,45 @@ func setupTest() {
 			Client:    mock,
 		},
 	}
+}
+
+func TestGetJobs(t *testing.T) {
+
+	tests = setupGetJobsTest()
+	setupMock()
+
+	mux.HandleFunc("/jobs", jobsDBConn.getJobsHandler)
+
+	for _, tt := range tests {
+
+		t.Run(tt.Name, func(t *testing.T) {
+			respRecorder := httptest.NewRecorder()
+
+			req, err := http.NewRequest("GET", "/jobs", nil)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			mux.ServeHTTP(respRecorder, req)
+
+			if tt.WantStatusCode != respRecorder.Code {
+				t.Errorf("%s: Got wrong response code %d, wanted %d",
+					tt.Id, respRecorder.Code, tt.WantStatusCode)
+			}
+
+			if respRecorder.Result().StatusCode != http.StatusOK {
+				t.Errorf("Got error %v", respRecorder.Result().StatusCode)
+			}
+		})
+	}
 
 }
+
 func TestGetJobById(t *testing.T) {
 
-	setupTest()
+	tests = setupGetJobByIdTest()
+	setupMock()
 
 	mux.HandleFunc("/jobs/{id}", jobsDBConn.getJobsByIdHandler)
 
@@ -105,4 +118,41 @@ func TestGetJobById(t *testing.T) {
 		})
 	}
 
+}
+
+func setupGetJobByIdTest() []shared.GenericTest {
+
+	return []shared.GenericTest{
+		{
+			Name:           "check valid id",
+			Id:             VALID_ID,
+			WantStatusCode: 200,
+			WantErrorMsg:   shared.NO_ERR,
+		},
+		{
+			Name:           "check missing id",
+			Id:             MISSING_ID,
+			WantStatusCode: 400,
+			WantErrorMsg:   shared.ID_NOT_FOUND,
+		},
+		{
+			Name:           "check invalid uuid",
+			Id:             INVALID_UUID,
+			WantStatusCode: 400,
+			WantErrorMsg:   shared.ID_NOT_IN_UUID_FORMAT,
+		},
+	}
+
+}
+
+func setupGetJobsTest() []shared.GenericTest {
+
+	return []shared.GenericTest{
+		{
+			Name:           "check result is returned",
+			Id:             VALID_ID,
+			WantStatusCode: 200,
+			WantErrorMsg:   shared.NO_ERR,
+		},
+	}
 }
