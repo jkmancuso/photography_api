@@ -84,6 +84,14 @@ func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeVal
 		TableName: &db.Tablename,
 		Key:       pKey,
 	}
+	log.Printf("KEY: %+v", pKey)
+	var rec_num string
+	_ = attributevalue.Unmarshal(pKey["record_num"], &rec_num)
+	log.Printf("RECORD NUM: %v", rec_num)
+
+	var job_id string
+	_ = attributevalue.Unmarshal(pKey["job_id"], &job_id)
+	log.Printf("JOB ID: %+s", job_id)
 
 	resp, err := db.Client.GetItem(ctx, input)
 

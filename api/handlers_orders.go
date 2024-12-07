@@ -105,7 +105,16 @@ func (h handlerDBConn) getOrdersByPKeyHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	val1, _ := attributevalue.Marshal(queryVal1)
+	// generally record_num should be an int 1-100
+	intVal1, err := strconv.Atoi(queryVal1)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "wrong format"})
+		return
+	}
+
+	val1, _ := attributevalue.Marshal(intVal1)
 	val2, _ := attributevalue.Marshal(queryVal2)
 
 	pkey := map[string]types.AttributeValue{
