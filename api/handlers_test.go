@@ -18,13 +18,14 @@ const MISSING_ID = "c0fd7513-39b4-404a-9b6b-26b00e8369ab"
 const INVALID_UUID = "123456789"
 
 var tests = []struct {
+	name           string
 	id             string
 	wantStatusCode int
 	wantErrorMsg   shared.GenericMsg
 }{
-	{VALID_ID, 200, shared.NO_ERR},
-	{MISSING_ID, 400, shared.ID_NOT_FOUND},
-	{INVALID_UUID, 400, shared.ID_NOT_IN_UUID_FORMAT},
+	{"check valid id", VALID_ID, 200, shared.NO_ERR},
+	{"check missing id", MISSING_ID, 400, shared.ID_NOT_FOUND},
+	{"check invalid uuid", INVALID_UUID, 400, shared.ID_NOT_IN_UUID_FORMAT},
 }
 
 func TestGetJobById(t *testing.T) {
@@ -53,30 +54,33 @@ func TestGetJobById(t *testing.T) {
 	mux.HandleFunc("/jobs/{id}", jobsDBConn.getJobsByIdHandler)
 
 	for _, tt := range tests {
-		respRecorder := httptest.NewRecorder()
 
-		req, err := http.NewRequest("GET", fmt.Sprintf("/jobs/%s", tt.id), nil)
+		t.Run(tt.name, func(t *testing.T) {
+			respRecorder := httptest.NewRecorder()
 
-		if err != nil {
-			t.Fatal(err)
-		}
+			req, err := http.NewRequest("GET", fmt.Sprintf("/jobs/%s", tt.id), nil)
 
-		mux.ServeHTTP(respRecorder, req)
-
-		if tt.wantStatusCode != respRecorder.Code {
-			t.Errorf("%s: Got wrong response code %d, wanted %d",
-				tt.id, respRecorder.Code, tt.wantStatusCode)
-		}
-
-		if respRecorder.Result().StatusCode != http.StatusOK {
-			gotMsg := shared.GenericMsg{}
-			_ = json.Unmarshal(respRecorder.Body.Bytes(), &gotMsg)
-
-			if gotMsg.Message != tt.wantErrorMsg.Message {
-				t.Errorf("%s: Got wrong err msg %s, wanted %s",
-					tt.id, respRecorder.Body.String(), tt.wantErrorMsg.Message)
+			if err != nil {
+				t.Fatal(err)
 			}
-		}
+
+			mux.ServeHTTP(respRecorder, req)
+
+			if tt.wantStatusCode != respRecorder.Code {
+				t.Errorf("%s: Got wrong response code %d, wanted %d",
+					tt.id, respRecorder.Code, tt.wantStatusCode)
+			}
+
+			if respRecorder.Result().StatusCode != http.StatusOK {
+				gotMsg := shared.GenericMsg{}
+				_ = json.Unmarshal(respRecorder.Body.Bytes(), &gotMsg)
+
+				if gotMsg.Message != tt.wantErrorMsg.Message {
+					t.Errorf("%s: Got wrong err msg %s, wanted %s",
+						tt.id, respRecorder.Body.String(), tt.wantErrorMsg.Message)
+				}
+			}
+		})
 	}
 
 }
