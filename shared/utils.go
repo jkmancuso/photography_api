@@ -56,3 +56,12 @@ func GenerateUUID() string {
 	id, _ := uuid.NewV7()
 	return id.String()
 }
+
+func IsUUID(s string) bool {
+
+	if _, err := uuid.Parse(s); err != nil {
+		return false
+	}
+
+	return true
+}
