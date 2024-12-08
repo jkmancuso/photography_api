@@ -53,7 +53,7 @@ func TestAddJob(t *testing.T) {
 	tests = setupAddJobTest()
 	setupJobMock()
 
-	mux.HandleFunc("POST /jobs", jobsDBConn.addJobsHandler)
+	mux.HandleFunc("POST /jobs", jobsDBConn.addJobHandler)
 
 	for _, tt := range tests {
 
@@ -133,7 +133,7 @@ func TestGetJobById(t *testing.T) {
 	tests = setupGetJobByIdTest()
 	setupJobMock()
 
-	mux.HandleFunc("GET /jobs/{id}", jobsDBConn.getJobsByIdHandler)
+	mux.HandleFunc("GET /jobs/{id}", jobsDBConn.getJobByIdHandler)
 
 	for _, tt := range tests {
 

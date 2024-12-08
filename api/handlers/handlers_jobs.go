@@ -84,7 +84,7 @@ func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) 
 
 }
 
-func (h handlerDBConn) getJobsByIdHandler(w http.ResponseWriter, r *http.Request) {
+func (h handlerDBConn) getJobByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
 
@@ -121,7 +121,7 @@ func (h handlerDBConn) getJobsByIdHandler(w http.ResponseWriter, r *http.Request
 
 }
 
-func (h handlerDBConn) addJobsHandler(w http.ResponseWriter, r *http.Request) {
+func (h handlerDBConn) addJobHandler(w http.ResponseWriter, r *http.Request) {
 	bytesBody, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
