@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
@@ -42,9 +41,9 @@ func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if _, err := strconv.Atoi(id); err != nil {
+	if !shared.IsUUID(id) {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id needs to be an int"})
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id needs to be in uuid format"})
 		return
 	}
 

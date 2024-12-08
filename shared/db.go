@@ -142,13 +142,12 @@ func (db DBInfo) DeleteItem(ctx context.Context, idStr string) (int, error) {
 	key := map[string]types.AttributeValue{"id": id}
 
 	resp, err := db.Client.DeleteItem(ctx, &dynamodb.DeleteItemInput{
-		TableName: &db.Tablename,
-		Key:       key,
+		TableName:    &db.Tablename,
+		Key:          key,
+		ReturnValues: types.ReturnValueAllOld,
 	})
 
-	count := len(resp.Attributes)
-
-	return count, err
+	return len(resp.Attributes), err
 }
 
 func ParseBodyIntoNewJob(body []byte) (*DBJobItem, error) {
