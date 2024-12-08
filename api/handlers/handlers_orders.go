@@ -22,13 +22,13 @@ func (h handlerDBConn) deleteOrderHandler(w http.ResponseWriter, r *http.Request
 
 	if len(id) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id cannot be empty"})
+		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
 		return
 	}
 
 	if !shared.IsUUID(id) {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id needs to be an int"})
+		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
 		return
 	}
 
@@ -42,7 +42,7 @@ func (h handlerDBConn) deleteOrderHandler(w http.ResponseWriter, r *http.Request
 
 	if count == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id not found"})
+		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
 		return
 	}
 
@@ -56,13 +56,12 @@ func (h handlerDBConn) getOrdersByIdHandler(w http.ResponseWriter, r *http.Reque
 
 	if len(id) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id cannot be empty"})
-		return
+		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
 	}
 
 	if !shared.IsUUID(id) {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id needs to be in uuid format"})
+		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
 		return
 	}
 
@@ -80,7 +79,7 @@ func (h handlerDBConn) getOrdersByIdHandler(w http.ResponseWriter, r *http.Reque
 
 	if count == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id not found"})
+		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
 		return
 	}
 
@@ -98,13 +97,13 @@ func (h handlerDBConn) getOrdersByGSIHandler(w http.ResponseWriter, r *http.Requ
 
 	if len(queryVal1) == 0 || len(queryVal2) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "missing id"})
+		json.NewEncoder(w).Encode(shared.ID_NOT_FOUND)
 		return
 	}
 
 	if !shared.IsUUID(queryVal2) {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id needs to be in uuid format"})
+		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
 		return
 	}
 
@@ -113,7 +112,7 @@ func (h handlerDBConn) getOrdersByGSIHandler(w http.ResponseWriter, r *http.Requ
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "wrong format"})
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 		return
 	}
 
@@ -132,7 +131,7 @@ func (h handlerDBConn) getOrdersByGSIHandler(w http.ResponseWriter, r *http.Requ
 
 	if count == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "record not found"})
+		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
 		return
 	}
 
@@ -146,7 +145,7 @@ func (h handlerDBConn) addOrdersHandler(w http.ResponseWriter, r *http.Request) 
 
 	if len(bytesBody) == 0 || err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "invalid request body"})
+		json.NewEncoder(w).Encode(shared.INVALID_BODY)
 		return
 	}
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -18,7 +19,7 @@ const MISSING_ID = "c0fd7513-39b4-404a-9b6b-26b00e8369ab"
 const INVALID_UUID = "123456789"
 
 var (
-	tests      []shared.GenericTest
+	tests      []GenericTest
 	mock       shared.DynamoClientMock
 	jobsDBConn handlerDBConn
 )
@@ -47,12 +48,42 @@ func setupJobMock() {
 	}
 }
 
+func TestAddJob(t *testing.T) {
+
+	tests = setupAddJobTest()
+	setupJobMock()
+
+	mux.HandleFunc("POST /jobs", jobsDBConn.addJobsHandler)
+
+	for _, tt := range tests {
+
+		t.Run(tt.Name, func(t *testing.T) {
+			respRecorder := httptest.NewRecorder()
+
+			req, err := http.NewRequest("POST", "/jobs", strings.NewReader(tt.Body))
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			mux.ServeHTTP(respRecorder, req)
+
+			if tt.WantStatusCode != respRecorder.Code {
+				t.Errorf("%s: Got wrong response code %d, wanted %d",
+					tt.Id, respRecorder.Code, tt.WantStatusCode)
+			}
+
+		})
+	}
+
+}
+
 func TestGetJobs(t *testing.T) {
 
 	tests = setupGetJobsTest()
 	setupJobMock()
 
-	mux.HandleFunc("/jobs", jobsDBConn.getJobsHandler)
+	mux.HandleFunc("GET /jobs", jobsDBConn.getJobsHandler)
 
 	for _, tt := range tests {
 
@@ -72,9 +103,6 @@ func TestGetJobs(t *testing.T) {
 					tt.Id, respRecorder.Code, tt.WantStatusCode)
 			}
 
-			if respRecorder.Result().StatusCode != http.StatusOK {
-				t.Errorf("Got error %v", respRecorder.Result().StatusCode)
-			}
 		})
 	}
 
@@ -85,7 +113,7 @@ func TestGetJobById(t *testing.T) {
 	tests = setupGetJobByIdTest()
 	setupJobMock()
 
-	mux.HandleFunc("/jobs/{id}", jobsDBConn.getJobsByIdHandler)
+	mux.HandleFunc("GET /jobs/{id}", jobsDBConn.getJobsByIdHandler)
 
 	for _, tt := range tests {
 
@@ -119,20 +147,19 @@ func TestGetJobById(t *testing.T) {
 
 }
 
-func setupGetJobByIdTest() []shared.GenericTest {
+func setupGetJobByIdTest() []GenericTest {
 
-	return []shared.GenericTest{
+	return []GenericTest{
 		{
 			Name:           "check valid id",
 			Id:             VALID_ID,
 			WantStatusCode: 200,
-			WantErrorMsg:   shared.NO_ERR,
 		},
 		{
 			Name:           "check missing id",
 			Id:             MISSING_ID,
 			WantStatusCode: 400,
-			WantErrorMsg:   shared.ID_NOT_FOUND,
+			WantErrorMsg:   shared.RECORD_NOT_FOUND,
 		},
 		{
 			Name:           "check invalid uuid",
@@ -144,14 +171,30 @@ func setupGetJobByIdTest() []shared.GenericTest {
 
 }
 
-func setupGetJobsTest() []shared.GenericTest {
+func setupGetJobsTest() []GenericTest {
 
-	return []shared.GenericTest{
+	return []GenericTest{
 		{
 			Name:           "check result is returned",
 			Id:             VALID_ID,
 			WantStatusCode: 200,
-			WantErrorMsg:   shared.NO_ERR,
+		},
+	}
+}
+
+func setupAddJobTest() []GenericTest {
+
+	return []GenericTest{
+		{
+			Name:           "check valid body",
+			Body:           `{"job_name":"test job", "job_year":2025}`,
+			WantStatusCode: 200,
+		},
+		{
+			Name:           "check empty body",
+			Body:           ``,
+			WantStatusCode: 400,
+			WantErrorMsg:   shared.INVALID_BODY,
 		},
 	}
 }

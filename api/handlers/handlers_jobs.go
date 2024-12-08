@@ -27,7 +27,7 @@ func (h handlerDBConn) getJobsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if count == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "no jobs found"})
+		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
 		return
 	}
 
@@ -41,13 +41,13 @@ func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) 
 
 	if len(id) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id cannot be empty"})
+		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
 		return
 	}
 
 	if !shared.IsUUID(id) {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id needs to be in uuid format"})
+		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
 		return
 	}
 
@@ -62,7 +62,7 @@ func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) 
 
 	if len(orderItem.Id) != 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "attempting to delete a job in use"})
+		json.NewEncoder(w).Encode(shared.RECORD_IN_USE)
 		return
 	}
 
@@ -76,11 +76,11 @@ func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) 
 
 	if count == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id not found"})
+		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
 		return
 	}
 
-	json.NewEncoder(w).Encode(shared.GenericMsg{Message: "OK"})
+	json.NewEncoder(w).Encode(shared.OK)
 
 }
 
@@ -90,13 +90,13 @@ func (h handlerDBConn) getJobsByIdHandler(w http.ResponseWriter, r *http.Request
 
 	if len(id) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id cannot be empty"})
+		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
 		return
 	}
 
 	if !shared.IsUUID(id) {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id needs to be in uuid format"})
+		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
 		return
 	}
 
@@ -113,7 +113,7 @@ func (h handlerDBConn) getJobsByIdHandler(w http.ResponseWriter, r *http.Request
 
 	if count == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id not found"})
+		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
 		return
 	}
 
@@ -127,7 +127,7 @@ func (h handlerDBConn) addJobsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(bytesBody) == 0 || err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "invalid request body"})
+		json.NewEncoder(w).Encode(shared.INVALID_BODY)
 		return
 	}
 
@@ -169,7 +169,6 @@ func checkOrderHandler(url string) (*shared.DBOrderItem, error) {
 	resultBytes, err := io.ReadAll(respRecorder.Result().Body)
 
 	if err != nil {
-		log.Printf("ERROR: %v", err)
 		return orderItem, err
 	}
 
