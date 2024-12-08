@@ -103,7 +103,7 @@ func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeVal
 
 func (db DBInfo) QueryItem(ctx context.Context, keys map[string]expression.ValueBuilder, gsi string) (*dynamodb.QueryOutput, error) {
 
-	if len(keys) != 1 || len(keys) != 2 {
+	if len(keys) != 1 && len(keys) != 2 {
 		return &dynamodb.QueryOutput{}, errors.New("unsupported key condition")
 	}
 

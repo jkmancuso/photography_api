@@ -91,8 +91,8 @@ func (h handlerDBConn) getOrdersByGSIHandler(w http.ResponseWriter, r *http.Requ
 
 	queryParam1 := "record_num"
 	queryParam2 := "job_id" //should be some uuid
-
 	queryVal1 := r.URL.Query().Get(queryParam1)
+
 	queryVal2 := r.URL.Query().Get(queryParam2)
 
 	if len(queryVal1) == 0 || len(queryVal2) == 0 {

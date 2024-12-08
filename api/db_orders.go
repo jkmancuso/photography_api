@@ -36,6 +36,10 @@ func getOrderByGSI(ctx context.Context, db *shared.DBInfo, keys map[string]expre
 
 	resp, err := db.QueryItem(ctx, keys, gsi)
 
+	if len(resp.Items) == 0 {
+		return orderItem, 0, nil
+	}
+
 	if err != nil {
 		return orderItem, 0, err
 	}

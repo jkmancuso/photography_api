@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 
@@ -149,10 +150,12 @@ func (h handlerDBConn) addJobsHandler(w http.ResponseWriter, r *http.Request) {
 // check if an order exists using this job in case you
 // attempt to delete the job
 func checkOrderHandler(url string) (*shared.DBOrderItem, error) {
+	log.Printf("URL: %s", url)
 	orderItem := &shared.DBOrderItem{}
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
+		log.Printf("ERROR: %v", err)
 		return orderItem, err
 	}
 
@@ -162,6 +165,7 @@ func checkOrderHandler(url string) (*shared.DBOrderItem, error) {
 	resultBytes, err := io.ReadAll(respRecorder.Result().Body)
 
 	if err != nil {
+		log.Printf("ERROR: %v", err)
 		return orderItem, err
 	}
 
