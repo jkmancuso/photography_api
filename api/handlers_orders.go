@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -149,20 +151,50 @@ func (h handlerDBConn) addOrdersHandler(w http.ResponseWriter, r *http.Request) 
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 	}
 
-	jobItem, err := shared.ParseBodyIntoNewJob(bytesBody)
+	orderItem, err := shared.ParseBodyIntoNewOrder(bytesBody)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 	}
 
-	err = addJob(context.Background(), h.dbInfo, jobItem)
+	// if you add an order with a non existent job something is wrong- abort
+	jobItem, err := checkJobHandler(fmt.Sprintf("/jobs/%s", orderItem.JobId))
+
+	if err != nil || len(jobItem.Id) == 0 {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "the job entered was not found"})
+		return
+	}
+
+	err = addOrder(context.Background(), h.dbInfo, orderItem)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 	}
 
-	json.NewEncoder(w).Encode(jobItem)
+	json.NewEncoder(w).Encode(orderItem)
 
+}
+
+func checkJobHandler(url string) (*shared.DBJobItem, error) {
+	jobItem := &shared.DBJobItem{}
+	req, err := http.NewRequest("GET", url, nil)
+
+	if err != nil {
+		return jobItem, err
+	}
+
+	respRecorder := httptest.NewRecorder()
+	http.DefaultServeMux.ServeHTTP(respRecorder, req)
+
+	resultBytes, err := io.ReadAll(respRecorder.Result().Body)
+
+	if err != nil {
+		return jobItem, err
+	}
+
+	err = json.Unmarshal(resultBytes, &jobItem)
+	return jobItem, err
 }

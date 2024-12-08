@@ -8,6 +8,18 @@ import (
 	"github.com/jkmancuso/photography_api/shared"
 )
 
+func addOrder(ctx context.Context, db *shared.DBInfo, order *shared.DBOrderItem) error {
+
+	item, err := attributevalue.MarshalMap(order)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.AddItem(ctx, item)
+	return err
+}
+
 // Global secondary index supports Query, not GetItem
 // id is your GSI
 func getOrderByGSI(ctx context.Context, db *shared.DBInfo, k string, v string, gsi string) (*shared.DBOrderItem, int, error) {
