@@ -73,6 +73,16 @@ func TestAddJob(t *testing.T) {
 					tt.Id, respRecorder.Code, tt.WantStatusCode)
 			}
 
+			if respRecorder.Result().StatusCode != http.StatusOK {
+				gotMsg := shared.GenericMsg{}
+				_ = json.Unmarshal(respRecorder.Body.Bytes(), &gotMsg)
+
+				if gotMsg.Message != tt.WantErrorMsg.Message {
+					t.Errorf("%s: Got wrong err msg %s, wanted %s",
+						tt.Id, respRecorder.Body.String(), tt.WantErrorMsg.Message)
+				}
+			}
+
 		})
 	}
 
@@ -101,6 +111,16 @@ func TestGetJobs(t *testing.T) {
 			if tt.WantStatusCode != respRecorder.Code {
 				t.Errorf("%s: Got wrong response code %d, wanted %d",
 					tt.Id, respRecorder.Code, tt.WantStatusCode)
+			}
+
+			if respRecorder.Result().StatusCode != http.StatusOK {
+				gotMsg := shared.GenericMsg{}
+				_ = json.Unmarshal(respRecorder.Body.Bytes(), &gotMsg)
+
+				if gotMsg.Message != tt.WantErrorMsg.Message {
+					t.Errorf("%s: Got wrong err msg %s, wanted %s",
+						tt.Id, respRecorder.Body.String(), tt.WantErrorMsg.Message)
+				}
 			}
 
 		})
