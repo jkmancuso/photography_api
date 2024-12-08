@@ -8,6 +8,12 @@ import (
 	"github.com/jkmancuso/photography_api/shared"
 )
 
+func deleteOrder(ctx context.Context, db *shared.DBInfo, id string) (int, error) {
+
+	count, err := db.DeleteItem(ctx, id)
+	return count, err
+}
+
 func addOrder(ctx context.Context, db *shared.DBInfo, order *shared.DBOrderItem) error {
 
 	item, err := attributevalue.MarshalMap(order)

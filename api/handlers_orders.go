@@ -24,13 +24,13 @@ func (h handlerDBConn) deleteOrderHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if _, err := strconv.Atoi(id); err != nil {
+	if !shared.IsUUID(id) {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "id needs to be an int"})
 		return
 	}
 
-	count, err := deleteJob(context.Background(), h.dbInfo, id)
+	count, err := deleteOrder(context.Background(), h.dbInfo, id)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -178,6 +178,7 @@ func (h handlerDBConn) addOrdersHandler(w http.ResponseWriter, r *http.Request) 
 
 }
 
+// check if a job exists
 func checkJobHandler(url string) (*shared.DBJobItem, error) {
 	jobItem := &shared.DBJobItem{}
 	req, err := http.NewRequest("GET", url, nil)
