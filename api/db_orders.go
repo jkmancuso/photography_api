@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/jkmancuso/photography_api/shared"
 )
@@ -28,12 +29,12 @@ func addOrder(ctx context.Context, db *shared.DBInfo, order *shared.DBOrderItem)
 
 // Global secondary index supports Query, not GetItem
 // id is your GSI
-func getOrderByGSI(ctx context.Context, db *shared.DBInfo, k string, v string, gsi string) (*shared.DBOrderItem, int, error) {
+func getOrderByGSI(ctx context.Context, db *shared.DBInfo, keys map[string]expression.ValueBuilder, gsi string) (*shared.DBOrderItem, int, error) {
 
 	orderItem := &shared.DBOrderItem{}
 	orderItems := []shared.DBOrderItem{}
 
-	resp, err := db.QueryItem(ctx, k, v, gsi)
+	resp, err := db.QueryItem(ctx, keys, gsi)
 
 	if err != nil {
 		return orderItem, 0, err
@@ -47,7 +48,6 @@ func getOrderByGSI(ctx context.Context, db *shared.DBInfo, k string, v string, g
 }
 
 // GetItem
-// query for record_num and job_id
 func getOrderByPKey(ctx context.Context, db *shared.DBInfo, pKey map[string]types.AttributeValue) (*shared.DBOrderItem, int, error) {
 
 	orderItem := &shared.DBOrderItem{}

@@ -101,10 +101,19 @@ func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeVal
 	return resp, err
 }
 
-func (db DBInfo) QueryItem(ctx context.Context, k string, v string, gsi string) (*dynamodb.QueryOutput, error) {
+func (db DBInfo) QueryItem(ctx context.Context, keys map[string]expression.ValueBuilder, gsi string) (*dynamodb.QueryOutput, error) {
 
-	keyEx := expression.Key(k).Equal(expression.Value(v))
-	expr, err := expression.NewBuilder().WithKeyCondition(keyEx).Build()
+	if len(keys) != 1 || len(keys) != 2 {
+		return &dynamodb.QueryOutput{}, errors.New("unsupported key condition")
+	}
+
+	exprBuilder := expression.NewBuilder()
+
+	for k, v := range keys {
+		exprBuilder = exprBuilder.WithKeyCondition(expression.Key(k).Equal(v))
+	}
+
+	expr, err := exprBuilder.Build()
 
 	if err != nil {
 		log.Printf("Couldn't build expression for query. Here's why: %v\n", err)

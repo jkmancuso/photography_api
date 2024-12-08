@@ -19,7 +19,7 @@ func setupRoutes() {
 	http.HandleFunc("POST /jobs", jobsDBConn.addJobsHandler)
 
 	http.HandleFunc("GET /orders/{id}", ordersDBConn.getOrdersByIdHandler)
-	http.HandleFunc("GET /orders", ordersDBConn.getOrdersByPKeyHandler)
+	http.HandleFunc("GET /orders", ordersDBConn.getOrdersByGSIHandler)
 	http.HandleFunc("POST /orders", ordersDBConn.addOrdersHandler)
 	http.HandleFunc("DELETE /orders/{id}", ordersDBConn.deleteOrderHandler)
 }

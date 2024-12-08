@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/jkmancuso/photography_api/shared"
 )
@@ -48,7 +49,6 @@ func (h handlerDBConn) deleteOrderHandler(w http.ResponseWriter, r *http.Request
 
 }
 
-// Dynamo Query via GSI
 func (h handlerDBConn) getOrdersByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
@@ -65,10 +65,11 @@ func (h handlerDBConn) getOrdersByIdHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	k := "id"
-	v := id
+	idVal, _ := attributevalue.Marshal(id)
 
-	item, count, err := getOrderByGSI(context.Background(), h.dbInfo, k, v, h.dbInfo.GSI)
+	pKey := map[string]types.AttributeValue{"id": idVal}
+
+	item, count, err := getOrderByPKey(context.Background(), h.dbInfo, pKey)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -86,8 +87,7 @@ func (h handlerDBConn) getOrdersByIdHandler(w http.ResponseWriter, r *http.Reque
 
 }
 
-// Dynamo GetItem via Primary Key
-func (h handlerDBConn) getOrdersByPKeyHandler(w http.ResponseWriter, r *http.Request) {
+func (h handlerDBConn) getOrdersByGSIHandler(w http.ResponseWriter, r *http.Request) {
 
 	queryParam1 := "record_num"
 	queryParam2 := "job_id" //should be some uuid
@@ -116,15 +116,12 @@ func (h handlerDBConn) getOrdersByPKeyHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	val1, _ := attributevalue.Marshal(intVal1)
-	val2, _ := attributevalue.Marshal(queryVal2)
-
-	pkey := map[string]types.AttributeValue{
-		queryParam1: val1,
-		queryParam2: val2,
+	key := map[string]expression.ValueBuilder{
+		queryParam1: expression.Value(intVal1),
+		queryParam2: expression.Value(queryVal2),
 	}
 
-	item, count, err := getOrderByPKey(context.Background(), h.dbInfo, pkey)
+	item, count, err := getOrderByGSI(context.Background(), h.dbInfo, key, h.dbInfo.GSI)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
