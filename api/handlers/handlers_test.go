@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
@@ -18,16 +18,15 @@ const MISSING_ID = "c0fd7513-39b4-404a-9b6b-26b00e8369ab"
 const INVALID_UUID = "123456789"
 
 var (
-	tests                  []shared.GenericTest
-	mock                   shared.DynamoClientMock
-	id, job_name, job_year types.AttributeValue
-	jobsDBConn             handlerDBConn
+	tests      []shared.GenericTest
+	mock       shared.DynamoClientMock
+	jobsDBConn handlerDBConn
 )
 
 var mux = *http.NewServeMux()
 
-func setupMock() {
-
+func setupJobMock() {
+	var id, job_name, job_year types.AttributeValue
 	id, _ = attributevalue.Marshal(VALID_ID)
 	job_name, _ = attributevalue.Marshal("mockedup_row")
 	job_year, _ = attributevalue.Marshal(2025)
@@ -51,7 +50,7 @@ func setupMock() {
 func TestGetJobs(t *testing.T) {
 
 	tests = setupGetJobsTest()
-	setupMock()
+	setupJobMock()
 
 	mux.HandleFunc("/jobs", jobsDBConn.getJobsHandler)
 
@@ -84,7 +83,7 @@ func TestGetJobs(t *testing.T) {
 func TestGetJobById(t *testing.T) {
 
 	tests = setupGetJobByIdTest()
-	setupMock()
+	setupJobMock()
 
 	mux.HandleFunc("/jobs/{id}", jobsDBConn.getJobsByIdHandler)
 

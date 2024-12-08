@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -11,12 +11,13 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/jkmancuso/photography_api/api/database"
 	"github.com/jkmancuso/photography_api/shared"
 )
 
 func (h handlerDBConn) getJobsHandler(w http.ResponseWriter, r *http.Request) {
 
-	items, count, err := getJobs(context.Background(), h.dbInfo)
+	items, count, err := database.GetJobs(context.Background(), h.dbInfo)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -65,7 +66,7 @@ func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	count, err := deleteJob(context.Background(), h.dbInfo, id)
+	count, err := database.DeleteJob(context.Background(), h.dbInfo, id)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -102,7 +103,7 @@ func (h handlerDBConn) getJobsByIdHandler(w http.ResponseWriter, r *http.Request
 	idVal, _ := attributevalue.Marshal(id)
 	pKey := map[string]types.AttributeValue{"id": idVal}
 
-	item, count, err := getJobById(context.Background(), h.dbInfo, pKey)
+	item, count, err := database.GetJobById(context.Background(), h.dbInfo, pKey)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -138,7 +139,7 @@ func (h handlerDBConn) addJobsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = addJob(context.Background(), h.dbInfo, jobItem)
+	err = database.AddJob(context.Background(), h.dbInfo, jobItem)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

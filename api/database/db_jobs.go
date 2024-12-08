@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"context"
@@ -8,7 +8,10 @@ import (
 	"github.com/jkmancuso/photography_api/shared"
 )
 
-func addJob(ctx context.Context, db *shared.DBInfo, job *shared.DBJobItem) error {
+const MAX_DB_ITEMS = 100
+const MAX_LOOP = 100
+
+func AddJob(ctx context.Context, db *shared.DBInfo, job *shared.DBJobItem) error {
 
 	item, err := attributevalue.MarshalMap(job)
 
@@ -20,13 +23,13 @@ func addJob(ctx context.Context, db *shared.DBInfo, job *shared.DBJobItem) error
 	return err
 }
 
-func deleteJob(ctx context.Context, db *shared.DBInfo, id string) (int, error) {
+func DeleteJob(ctx context.Context, db *shared.DBInfo, id string) (int, error) {
 
 	count, err := db.DeleteItem(ctx, id)
 	return count, err
 }
 
-func getJobs(ctx context.Context, db *shared.DBInfo) ([]*shared.DBJobItem, int, error) {
+func GetJobs(ctx context.Context, db *shared.DBInfo) ([]*shared.DBJobItem, int, error) {
 
 	var lek map[string]types.AttributeValue
 	var items []*shared.DBJobItem
@@ -60,7 +63,7 @@ func getJobs(ctx context.Context, db *shared.DBInfo) ([]*shared.DBJobItem, int, 
 	return items, len(items), nil
 }
 
-func getJobById(ctx context.Context, db *shared.DBInfo, pKey map[string]types.AttributeValue) (*shared.DBJobItem, int, error) {
+func GetJobById(ctx context.Context, db *shared.DBInfo, pKey map[string]types.AttributeValue) (*shared.DBJobItem, int, error) {
 
 	jobItem := &shared.DBJobItem{}
 

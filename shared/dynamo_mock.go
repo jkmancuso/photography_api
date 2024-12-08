@@ -32,7 +32,9 @@ func (client DynamoClientMock) Scan(ctx context.Context, input *dynamodb.ScanInp
 }
 
 func (client DynamoClientMock) PutItem(ctx context.Context, input *dynamodb.PutItemInput, opts ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error) {
-	return &dynamodb.PutItemOutput{}, nil
+	return &dynamodb.PutItemOutput{
+		Attributes: client.MockedRow,
+	}, nil
 }
 
 func (client DynamoClientMock) GetItem(ctx context.Context, input *dynamodb.GetItemInput, opts ...func(*dynamodb.Options)) (*dynamodb.GetItemOutput, error) {

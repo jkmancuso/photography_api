@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/jkmancuso/photography_api/api/database"
 	"github.com/jkmancuso/photography_api/shared"
 )
 
@@ -31,7 +32,7 @@ func (h handlerDBConn) deleteOrderHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	count, err := deleteOrder(context.Background(), h.dbInfo, id)
+	count, err := database.DeleteOrder(context.Background(), h.dbInfo, id)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -69,7 +70,7 @@ func (h handlerDBConn) getOrdersByIdHandler(w http.ResponseWriter, r *http.Reque
 
 	pKey := map[string]types.AttributeValue{"id": idVal}
 
-	item, count, err := getOrderByPKey(context.Background(), h.dbInfo, pKey)
+	item, count, err := database.GetOrderByPKey(context.Background(), h.dbInfo, pKey)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -121,7 +122,7 @@ func (h handlerDBConn) getOrdersByGSIHandler(w http.ResponseWriter, r *http.Requ
 		queryParam2: expression.Value(queryVal2),
 	}
 
-	item, count, err := getOrderByGSI(context.Background(), h.dbInfo, key, h.dbInfo.GSI)
+	item, count, err := database.GetOrderByGSI(context.Background(), h.dbInfo, key, h.dbInfo.GSI)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -166,7 +167,7 @@ func (h handlerDBConn) addOrdersHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = addOrder(context.Background(), h.dbInfo, orderItem)
+	err = database.AddOrder(context.Background(), h.dbInfo, orderItem)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"context"
@@ -9,13 +9,13 @@ import (
 	"github.com/jkmancuso/photography_api/shared"
 )
 
-func deleteOrder(ctx context.Context, db *shared.DBInfo, id string) (int, error) {
+func DeleteOrder(ctx context.Context, db *shared.DBInfo, id string) (int, error) {
 
 	count, err := db.DeleteItem(ctx, id)
 	return count, err
 }
 
-func addOrder(ctx context.Context, db *shared.DBInfo, order *shared.DBOrderItem) error {
+func AddOrder(ctx context.Context, db *shared.DBInfo, order *shared.DBOrderItem) error {
 
 	item, err := attributevalue.MarshalMap(order)
 
@@ -29,7 +29,7 @@ func addOrder(ctx context.Context, db *shared.DBInfo, order *shared.DBOrderItem)
 
 // Global secondary index supports Query, not GetItem
 // id is your GSI
-func getOrderByGSI(ctx context.Context, db *shared.DBInfo, keys map[string]expression.ValueBuilder, gsi string) (*shared.DBOrderItem, int, error) {
+func GetOrderByGSI(ctx context.Context, db *shared.DBInfo, keys map[string]expression.ValueBuilder, gsi string) (*shared.DBOrderItem, int, error) {
 
 	orderItem := &shared.DBOrderItem{}
 	orderItems := []shared.DBOrderItem{}
@@ -52,7 +52,7 @@ func getOrderByGSI(ctx context.Context, db *shared.DBInfo, keys map[string]expre
 }
 
 // GetItem
-func getOrderByPKey(ctx context.Context, db *shared.DBInfo, pKey map[string]types.AttributeValue) (*shared.DBOrderItem, int, error) {
+func GetOrderByPKey(ctx context.Context, db *shared.DBInfo, pKey map[string]types.AttributeValue) (*shared.DBOrderItem, int, error) {
 
 	orderItem := &shared.DBOrderItem{}
 

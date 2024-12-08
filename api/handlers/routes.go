@@ -1,10 +1,12 @@
-package main
+package handlers
 
 import (
 	"net/http"
+
+	"github.com/jkmancuso/photography_api/shared"
 )
 
-func setupRoutes() {
+func SetupRoutes(tableMap map[string]*shared.DBInfo) {
 	/*
 		use this struct to provide the DB client since it cannot be passed
 		as a parameter to function signature (w http.ResponseWriter, r *http.Request)

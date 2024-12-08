@@ -9,14 +9,12 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
+	"github.com/jkmancuso/photography_api/api/handlers"
 	"github.com/jkmancuso/photography_api/shared"
 )
 
 /* These global variables initialized below should already
 be available on lambda warm start saving on startup resource*/
-
-const MAX_DB_ITEMS = 100
-const MAX_LOOP = 100
 
 var httpLambda *httpadapter.HandlerAdapter
 
@@ -56,7 +54,7 @@ func init() {
 	}
 	tableMap["orders"].GSI = "job_id-record_num-index" //to do move this somewhere nicer
 
-	setupRoutes()
+	handlers.SetupRoutes(tableMap)
 
 	httpLambda = httpadapter.New(http.DefaultServeMux)
 
