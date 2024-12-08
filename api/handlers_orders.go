@@ -143,9 +143,10 @@ func (h handlerDBConn) addOrdersHandler(w http.ResponseWriter, r *http.Request) 
 	bytesBody, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+	if len(bytesBody) == 0 || err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "invalid request body"})
+		return
 	}
 
 	orderItem, err := shared.ParseBodyIntoNewOrder(bytesBody)
@@ -153,6 +154,7 @@ func (h handlerDBConn) addOrdersHandler(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
 	}
 
 	// if you add an order with a non existent job something is wrong- abort
@@ -169,6 +171,7 @@ func (h handlerDBConn) addOrdersHandler(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
 	}
 
 	json.NewEncoder(w).Encode(orderItem)

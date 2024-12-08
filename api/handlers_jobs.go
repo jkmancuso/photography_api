@@ -124,9 +124,10 @@ func (h handlerDBConn) addJobsHandler(w http.ResponseWriter, r *http.Request) {
 	bytesBody, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+	if len(bytesBody) == 0 || err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: "invalid request body"})
+		return
 	}
 
 	jobItem, err := shared.ParseBodyIntoNewJob(bytesBody)
@@ -134,6 +135,7 @@ func (h handlerDBConn) addJobsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
 	}
 
 	err = addJob(context.Background(), h.dbInfo, jobItem)
@@ -141,6 +143,7 @@ func (h handlerDBConn) addJobsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
 	}
 
 	json.NewEncoder(w).Encode(jobItem)
