@@ -156,17 +156,8 @@ func (h handlerDBConn) getOrdersByJobIDHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	// generally record_num should be an int 1-100
-	jobIdInt, err := strconv.Atoi(jobId)
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
-		return
-	}
-
 	key := map[string]expression.ValueBuilder{
-		"job_id": expression.Value(jobIdInt),
+		"job_id": expression.Value(jobId),
 	}
 
 	GSI := "job_id-index"
