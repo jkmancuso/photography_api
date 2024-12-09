@@ -58,7 +58,7 @@ func init() {
 		log.Fatal(err)
 	}
 
-	h := newHandlerMetadata(saltStr)
+	h := newHandlerMetadata(saltStr, tableMap)
 
 	http.HandleFunc("GET /ping", ping)
 	http.HandleFunc("POST /auth", h.postAuth)

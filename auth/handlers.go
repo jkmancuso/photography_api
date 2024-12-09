@@ -10,12 +10,14 @@ import (
 )
 
 type handlerMetadata struct {
-	Salt string
+	Salt  string
+	DBMap map[string]*shared.DBInfo
 }
 
-func newHandlerMetadata(salt string) *handlerMetadata {
+func newHandlerMetadata(salt string, DB map[string]*shared.DBInfo) *handlerMetadata {
 	return &handlerMetadata{
-		Salt: salt,
+		Salt:  salt,
+		DBMap: DB,
 	}
 }
 
@@ -55,11 +57,11 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.INVALID_USER_PASS)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 		return
 	}
 
-	token, err := checkDBForValidAuth(auth.Email, hashpass)
+	token, err := returnTokenForValidAuth(auth.Email, hashpass, h.DBMap["auth"])
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -73,7 +75,9 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Add("Set-Cookie", fmt.Sprintf("token=%q; max-age=%d", token, 86400))
+	w.Header().Add("Set-Cookie", fmt.Sprintf("token=%s; max-age=%d", token, 43200))
+
+	//add to login table here
 
 	json.NewEncoder(w).Encode(shared.OK)
 

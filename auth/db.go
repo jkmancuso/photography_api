@@ -1,5 +1,9 @@
 package main
 
-func checkDBForValidAuth(email string, hashedPassword string) (string, error) {
+import (
+	"github.com/jkmancuso/photography_api/shared"
+)
+
+func returnTokenForValidAuth(email string, hashedPassword string, db *shared.DBInfo) (string, error) {
 	return "", nil
 }
