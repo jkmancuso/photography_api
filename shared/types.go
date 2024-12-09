@@ -8,7 +8,13 @@ var INVALID_BODY = GenericMsg{Message: "body is missing or invalid"}
 var INVALID_REQUEST = GenericMsg{Message: "request is invalid"}
 var RECORD_NOT_FOUND = GenericMsg{Message: "no records found"}
 var RECORD_IN_USE = GenericMsg{Message: "the record you are attempting to delete is in use"}
+var INVALID_USER_PASS = GenericMsg{Message: "invalid user or password"}
 
 type GenericMsg struct {
 	Message string `json:"message"`
+}
+
+type Auth struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }

@@ -2,7 +2,6 @@ package shared
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"log"
 
@@ -19,7 +18,9 @@ type DBInfo struct {
 }
 
 type DBAdminItem struct {
-	Token string `dynamodbav:"token" json:"Token"`
+	Email    string `dynamodbav:"email" json:"email"`
+	Hashpass string `dynamodbav:"hashpass" json:"hashpass"`
+	Token    string `dynamodbav:"token" json:"Token"`
 }
 
 type DBLoginItem struct {
@@ -47,18 +48,6 @@ func NewDB(table string, cfg aws.Config) (*DBInfo, error) {
 	db.Client = client
 
 	return db, nil
-}
-
-func NewJobItem() *DBJobItem {
-	return &DBJobItem{
-		Id: GenerateUUID(),
-	}
-}
-
-func NewOrderItem() *DBOrderItem {
-	return &DBOrderItem{
-		Id: GenerateUUID(),
-	}
 }
 
 func (db DBInfo) DoFullScan(ctx context.Context, limit int32, lek map[string]types.AttributeValue) (*dynamodb.ScanOutput, error) {
@@ -156,30 +145,4 @@ func (db DBInfo) DeleteItem(ctx context.Context, idStr string) (int, error) {
 	})
 
 	return len(resp.Attributes), err
-}
-
-func ParseBodyIntoNewJob(body []byte) (*DBJobItem, error) {
-	jobItem := NewJobItem()
-	err := json.Unmarshal(body, jobItem)
-
-	if len(jobItem.JobName) == 0 || jobItem.JobYear == 0 {
-		err = errors.New("missing field in body")
-	}
-
-	log.Println(jobItem)
-
-	return jobItem, err
-}
-
-func ParseBodyIntoNewOrder(body []byte) (*DBOrderItem, error) {
-	orderItem := NewOrderItem()
-	err := json.Unmarshal(body, orderItem)
-
-	if orderItem.RecordNum == 0 || len(orderItem.JobId) == 0 {
-		err = errors.New("missing field in body")
-	}
-
-	log.Println(orderItem)
-
-	return orderItem, err
 }

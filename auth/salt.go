@@ -8,6 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 )
 
+const secretName = "salt"
+
 func GetSalt(cfg aws.Config) (string, error) {
 	svc := secretsmanager.NewFromConfig(cfg)
 
