@@ -28,7 +28,6 @@ func AddOrder(ctx context.Context, db *shared.DBInfo, order *shared.DBOrderItem)
 }
 
 // Global secondary index supports Query, not GetItem
-// id is your GSI
 func GetOrderByGSI(ctx context.Context, db *shared.DBInfo, keys map[string]expression.ValueBuilder, gsi string) (*shared.DBOrderItem, int, error) {
 
 	orderItem := &shared.DBOrderItem{}
@@ -49,6 +48,28 @@ func GetOrderByGSI(ctx context.Context, db *shared.DBInfo, keys map[string]expre
 	}
 
 	return &orderItems[0], 1, nil
+}
+
+// Global secondary index supports Query, not GetItem
+func GetOrdersByGSI(ctx context.Context, db *shared.DBInfo, keys map[string]expression.ValueBuilder, gsi string) ([]*shared.DBOrderItem, int, error) {
+
+	orderItems := []*shared.DBOrderItem{}
+
+	resp, err := db.QueryItem(ctx, keys, gsi)
+
+	if len(resp.Items) == 0 {
+		return orderItems, 0, nil
+	}
+
+	if err != nil {
+		return orderItems, 0, err
+	}
+
+	if err = attributevalue.UnmarshalListOfMaps(resp.Items, &orderItems); err != nil {
+		return orderItems, 0, err
+	}
+
+	return orderItems, 1, nil
 }
 
 // GetItem

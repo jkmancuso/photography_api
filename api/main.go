@@ -52,7 +52,6 @@ func init() {
 			tableMap[name] = db
 		}
 	}
-	tableMap["orders"].GSI = "job_id-record_num-index" //to do move this somewhere nicer
 
 	handlers.SetupRoutes(tableMap)
 

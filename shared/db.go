@@ -16,7 +16,6 @@ import (
 type DBInfo struct {
 	Tablename string
 	Client    DynamoClientInterface
-	GSI       string //optinal global secondary index
 }
 
 type DBAdminItem struct {

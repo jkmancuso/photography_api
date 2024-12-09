@@ -50,7 +50,7 @@ func (h handlerDBConn) deleteOrderHandler(w http.ResponseWriter, r *http.Request
 
 }
 
-func (h handlerDBConn) getOrdersByIdHandler(w http.ResponseWriter, r *http.Request) {
+func (h handlerDBConn) getOrderByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
 
@@ -87,28 +87,26 @@ func (h handlerDBConn) getOrdersByIdHandler(w http.ResponseWriter, r *http.Reque
 
 }
 
-func (h handlerDBConn) getOrdersByGSIHandler(w http.ResponseWriter, r *http.Request) {
+func (h handlerDBConn) getOrderByJobIDAndRecordNumHandler(w http.ResponseWriter, r *http.Request) {
+	/* GET /jobs/{id}/orders/{record_num} */
 
-	queryParam1 := "record_num"
-	queryParam2 := "job_id" //should be some uuid
-	queryVal1 := r.URL.Query().Get(queryParam1)
+	jobId := r.PathValue("job_id")
+	recordNum := r.PathValue("record_num")
 
-	queryVal2 := r.URL.Query().Get(queryParam2)
-
-	if len(queryVal1) == 0 || len(queryVal2) == 0 {
+	if len(recordNum) == 0 || len(jobId) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_NOT_FOUND)
+		json.NewEncoder(w).Encode(shared.INVALID_REQUEST)
 		return
 	}
 
-	if !shared.IsUUID(queryVal2) {
+	if !shared.IsUUID(jobId) {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
 		return
 	}
 
 	// generally record_num should be an int 1-100
-	intVal1, err := strconv.Atoi(queryVal1)
+	recordInt, err := strconv.Atoi(recordNum)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -116,12 +114,15 @@ func (h handlerDBConn) getOrdersByGSIHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	//build Query with expression builder
 	key := map[string]expression.ValueBuilder{
-		queryParam1: expression.Value(intVal1),
-		queryParam2: expression.Value(queryVal2),
+		"record_num": expression.Value(recordInt),
+		"job_id":     expression.Value(jobId),
 	}
 
-	item, count, err := database.GetOrderByGSI(context.Background(), h.dbInfo, key, h.dbInfo.GSI)
+	GSI := "job_id-record_num-index"
+
+	item, count, err := database.GetOrderByGSI(context.Background(), h.dbInfo, key, GSI)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -139,7 +140,55 @@ func (h handlerDBConn) getOrdersByGSIHandler(w http.ResponseWriter, r *http.Requ
 
 }
 
-func (h handlerDBConn) addOrdersHandler(w http.ResponseWriter, r *http.Request) {
+func (h handlerDBConn) getOrdersByJobIDHandler(w http.ResponseWriter, r *http.Request) {
+
+	jobId := r.PathValue("job_id")
+
+	if len(jobId) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.ID_NOT_FOUND)
+		return
+	}
+
+	if !shared.IsUUID(jobId) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
+		return
+	}
+
+	// generally record_num should be an int 1-100
+	jobIdInt, err := strconv.Atoi(jobId)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
+	}
+
+	key := map[string]expression.ValueBuilder{
+		"job_id": expression.Value(jobIdInt),
+	}
+
+	GSI := "job_id-index"
+	items, count, err := database.GetOrdersByGSI(context.Background(), h.dbInfo, key, GSI)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
+	}
+
+	if count == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
+		return
+	}
+
+	json.NewEncoder(w).Encode(items)
+
+}
+
+func (h handlerDBConn) addOrderHandler(w http.ResponseWriter, r *http.Request) {
 	bytesBody, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 

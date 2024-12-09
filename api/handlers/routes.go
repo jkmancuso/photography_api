@@ -20,8 +20,9 @@ func SetupRoutes(tableMap map[string]*shared.DBInfo) {
 	http.HandleFunc("DELETE /jobs/{id}", jobsDBConn.deleteJobHandler)
 	http.HandleFunc("POST /jobs", jobsDBConn.addJobHandler)
 
-	http.HandleFunc("GET /orders", ordersDBConn.getOrdersByGSIHandler)
-	http.HandleFunc("GET /orders/{id}", ordersDBConn.getOrdersByIdHandler)
+	http.HandleFunc("GET /jobs/{id}/orders/{record_num}", ordersDBConn.getOrderByJobIDAndRecordNumHandler)
+	http.HandleFunc("GET /orders/{job_id}", ordersDBConn.getOrdersByJobIDHandler)
+	http.HandleFunc("GET /orders/{id}", ordersDBConn.getOrderByIdHandler)
 	http.HandleFunc("DELETE /orders/{id}", ordersDBConn.deleteOrderHandler)
-	http.HandleFunc("POST /orders", ordersDBConn.addOrdersHandler)
+	http.HandleFunc("POST /orders", ordersDBConn.addOrderHandler)
 }
