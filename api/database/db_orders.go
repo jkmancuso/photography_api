@@ -35,10 +35,6 @@ func GetOrderByGSI(ctx context.Context, db *shared.DBInfo, keys map[string]expre
 
 	resp, err := db.QueryItem(ctx, keys, gsi)
 
-	if len(resp.Items) == 0 {
-		return orderItem, 0, nil
-	}
-
 	if err != nil {
 		return orderItem, 0, err
 	}
@@ -47,7 +43,7 @@ func GetOrderByGSI(ctx context.Context, db *shared.DBInfo, keys map[string]expre
 		return orderItem, 0, err
 	}
 
-	return &orderItems[0], 1, nil
+	return &orderItems[0], len(resp.Items), nil
 }
 
 // Global secondary index supports Query, not GetItem
@@ -57,10 +53,6 @@ func GetOrdersByGSI(ctx context.Context, db *shared.DBInfo, keys map[string]expr
 
 	resp, err := db.QueryItem(ctx, keys, gsi)
 
-	if len(resp.Items) == 0 {
-		return orderItems, 0, nil
-	}
-
 	if err != nil {
 		return orderItems, 0, err
 	}
@@ -69,7 +61,7 @@ func GetOrdersByGSI(ctx context.Context, db *shared.DBInfo, keys map[string]expr
 		return orderItems, 0, err
 	}
 
-	return orderItems, 1, nil
+	return orderItems, len(resp.Items), nil
 }
 
 // GetItem
@@ -87,5 +79,5 @@ func GetOrderByPKey(ctx context.Context, db *shared.DBInfo, pKey map[string]type
 		return orderItem, 0, err
 	}
 
-	return orderItem, 1, nil
+	return orderItem, len(resp.Item), nil
 }
