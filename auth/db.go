@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
@@ -33,8 +32,20 @@ func returnTokenForValidAuth(ctx context.Context, email string, hashedPassword s
 	}
 
 	if adminItem.Hashpass != hashedPassword {
-		return token, errors.New("invalid user/pass")
+		return token, nil
 	}
 
 	return adminItem.Token, nil
+}
+
+func addLogin(ctx context.Context, db *shared.DBInfo, login *shared.DBLoginItem) error {
+
+	item, err := attributevalue.MarshalMap(login)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.AddItem(ctx, item)
+	return err
 }

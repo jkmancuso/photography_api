@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"time"
 )
 
 func NewJobItem() *DBJobItem {
@@ -15,6 +16,14 @@ func NewJobItem() *DBJobItem {
 func NewOrderItem() *DBOrderItem {
 	return &DBOrderItem{
 		Id: GenerateUUID(),
+	}
+}
+
+func NewLoginItem(email string) *DBLoginItem {
+	return &DBLoginItem{
+		Email:     email,
+		LoginDate: int(time.Now().Unix()),
+		Success:   false,
 	}
 }
 
