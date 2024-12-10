@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -61,7 +62,10 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := returnTokenForValidAuth(auth.Email, hashpass, h.DBMap["auth"])
+	token, err := returnTokenForValidAuth(context.Background(),
+		auth.Email,
+		hashpass,
+		h.DBMap["auth"])
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
