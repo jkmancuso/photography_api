@@ -17,6 +17,7 @@ type integrationTest struct{
 	Email string
 	Password string
 	BaseUrl string
+	tests []GenericTest
 }
 
 func (i *integrationTest) setPassword() error{
@@ -40,11 +41,50 @@ func (i *integrationTest) setPassword() error{
 
 func (i *integrationTest) setup() {
 
+	//1. Get the testlogin password from aws secrets manager
 	err := i.setPassword()
 
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	//2. create a valid auth to test success
+	auth := &Auth{
+		Email: i.Email,
+		Password: i.Password
+	}
+
+	validBody, err := json.Marshal(auth)
+
+	if err !=nil {
+		t.Fatal(err)
+	}
+
+	//3. create an invalid auth to test failure 
+	auth := &Auth{
+		Email: "invalid_email@something.com",
+		Password: "invalid_pass@something.com",
+	}
+
+	invalidBody, err := json.Marshal(auth)
+
+	if err !=nil {
+		t.Fatal(err)
+	}
+
+	i.tests = []GenericTest{
+		{
+			Name:           "check valid auth",
+			BodyBytes:           validBody,
+			WantStatusCode: 200,
+		},
+		{
+			Name:           "check invalid auth rejects",
+			BodyBytes:           invalidBody,
+			WantStatusCode: 400,
+		},
+	}
+
 
 }
 
@@ -65,31 +105,25 @@ func TestAuth(t *testing.T) {
 	test := newIntegrationTest()
 	test.setup()
 
-	auth := Auth{
-		Email: test.Email,
-		Password: test.Password
-	}
+	for _, tt := range test.tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			reader := bytes.NewReader(body)
 
-	body, err := json.Marshal(auth)
+			postURL := fmt.Sprintf("%s/%s",test.BaseUrl,"auth")
+			resp, err := http.Post(postURL, contentType, reader)
 
-	if err !=nil {
-		t.Fatal(err)
-	}
-	reader := bytes.NewReader(body)
+			if err !=nil {
+				t.Fatal(err)
+			}
 
-	postURL := fmt.Sprintf("%s/%s",integrationTest.URL,"auth", reader)
-	resp, err := http.Post(postURL, contentType)
+			if resp.StatusCode != tt.WantStatusCode {
+				t.Fatalf("Got status %d, wanted %d", resp.StatusCode, WantStatusCode)
+			}
 
-	if err !=nil {
-		t.Fatal(err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("Got status %d, wanted %d", resp.StatusCode, http.StatusOK)
-	}
-
-	if len(resp.Header.Get("Set-Cookie"))==0 {
-		t.Fatal("Set-Cookie header not returned")
+			if resp.StatusCode ==http.StatusOK && len(resp.Header.Get("Set-Cookie"))==0 {
+				t.Fatal("Set-Cookie header not returned")
+			}
+		})
 	}
 
 	defer test.teardown() 

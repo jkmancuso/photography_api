@@ -19,7 +19,7 @@ const MISSING_ID = "c0fd7513-39b4-404a-9b6b-26b00e8369ab"
 const INVALID_UUID = "123456789"
 
 var (
-	tests      []GenericTest
+	tests      []shared.GenericTest
 	mock       shared.DynamoClientMock
 	jobsDBConn handlerDBConn
 )
@@ -167,9 +167,9 @@ func TestGetJobById(t *testing.T) {
 
 }
 
-func setupGetJobByIdTest() []GenericTest {
+func setupGetJobByIdTest() []shared.GenericTest {
 
-	return []GenericTest{
+	return []shared.GenericTest{
 		{
 			Name:           "check valid id",
 			Id:             VALID_ID,
@@ -191,9 +191,9 @@ func setupGetJobByIdTest() []GenericTest {
 
 }
 
-func setupGetJobsTest() []GenericTest {
+func setupGetJobsTest() []shared.GenericTest {
 
-	return []GenericTest{
+	return []shared.GenericTest{
 		{
 			Name:           "check result is returned",
 			Id:             VALID_ID,
@@ -202,17 +202,17 @@ func setupGetJobsTest() []GenericTest {
 	}
 }
 
-func setupAddJobTest() []GenericTest {
+func setupAddJobTest() []shared.GenericTest {
 
-	return []GenericTest{
+	return []shared.GenericTest{
 		{
 			Name:           "check valid body",
-			Body:           `{"job_name":"test job", "job_year":2025}`,
+			BodyStr:           `{"job_name":"test job", "job_year":2025}`,
 			WantStatusCode: 200,
 		},
 		{
 			Name:           "check empty body",
-			Body:           ``,
+			BodyStr:           ``,
 			WantStatusCode: 400,
 			WantErrorMsg:   shared.INVALID_BODY,
 		},
