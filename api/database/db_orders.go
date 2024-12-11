@@ -11,7 +11,15 @@ import (
 
 func DeleteOrder(ctx context.Context, db *shared.DBInfo, id string) (int, error) {
 
-	count, err := db.DeleteItem(ctx, id)
+	idAttr, err := attributevalue.Marshal(id)
+
+	if err != nil {
+		return 0, err
+	}
+
+	key := map[string]types.AttributeValue{"id": idAttr}
+
+	count, err := db.DeleteItem(ctx, key)
 	return count, err
 }
 

@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
@@ -128,20 +127,26 @@ func (db DBInfo) QueryItem(ctx context.Context, keys map[string]expression.Value
 	return resp, err
 }
 
-func (db DBInfo) DeleteItem(ctx context.Context, idStr string) (int, error) {
-
-	id, err := attributevalue.Marshal(idStr)
-
-	if err != nil {
-		return 0, err
-	}
-
-	key := map[string]types.AttributeValue{"id": id}
+func (db DBInfo) DeleteItem(ctx context.Context, pKey map[string]types.AttributeValue) (int, error) {
 
 	resp, err := db.Client.DeleteItem(ctx, &dynamodb.DeleteItemInput{
 		TableName:    &db.Tablename,
-		Key:          key,
+		Key:          pKey,
 		ReturnValues: types.ReturnValueAllOld,
+	})
+
+	return len(resp.Attributes), err
+}
+
+func (db DBInfo) UpdateItem(ctx context.Context, pKey map[string]types.AttributeValue, expr expression.Expression) (int, error) {
+
+	resp, err := db.Client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
+		TableName:                 &db.Tablename,
+		Key:                       pKey,
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		UpdateExpression:          expr.Update(),
+		ReturnValues:              types.ReturnValueAllNew,
 	})
 
 	return len(resp.Attributes), err

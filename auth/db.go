@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/jkmancuso/photography_api/shared"
 )
@@ -48,4 +49,35 @@ func addLogin(ctx context.Context, db *shared.DBInfo, login *shared.DBLoginItem)
 
 	err = db.AddItem(ctx, item)
 	return err
+}
+
+func updateLogin(ctx context.Context, db *shared.DBInfo, login *shared.DBLoginItem) (int, error) {
+
+	emailAttr, err := attributevalue.Marshal(login.Email)
+
+	if err != nil {
+		return 0, err
+	}
+
+	logindateAttr, err := attributevalue.Marshal(login.LoginDate)
+
+	if err != nil {
+		return 0, err
+	}
+
+	pKey := map[string]types.AttributeValue{
+		"email":      emailAttr,
+		"login_date": logindateAttr,
+	}
+
+	update := expression.Set(expression.Name("success"), expression.Value(true))
+	expr, err := expression.NewBuilder().WithUpdate(update).Build()
+
+	if err != nil {
+		return 0, err
+	}
+
+	count, err := db.UpdateItem(ctx, pKey, expr)
+
+	return count, err
 }

@@ -30,6 +30,8 @@ func ping(w http.ResponseWriter, r *http.Request) {
 
 func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 
+	ctx := context.Background()
+
 	bytesBody, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -56,7 +58,7 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	loginItem := shared.NewLoginItem(auth.Email)
-	err = addLogin(context.Background(), h.DBMap["logins"], loginItem)
+	err = addLogin(ctx, h.DBMap["logins"], loginItem)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -91,8 +93,20 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Set-Cookie", fmt.Sprintf("token=%s; max-age=%d", token, 43200))
 
-	//update loginItem success to true
+	count, err := updateLogin(ctx, h.DBMap["logins"], loginItem)
 
-	json.NewEncoder(w).Encode(shared.OK)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
+	}
+
+	returnMsg := shared.OK
+
+	if count == 0 {
+		returnMsg = shared.RECORD_NOT_FOUND
+	}
+
+	json.NewEncoder(w).Encode(returnMsg)
 
 }
