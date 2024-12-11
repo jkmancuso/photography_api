@@ -29,7 +29,7 @@ func (i *integrationTest) setPassword() error{
 		return(err)
 	}
 
-	password, err := GetSecret(awsCfg, "testpassword") 
+	password, err := GetSecret(awsCfg, "testlogin") 
 
 	if err != nil {
 		return(err)
