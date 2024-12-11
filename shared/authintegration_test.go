@@ -85,7 +85,7 @@ func (i *integrationTest) teardown() {
 
 func newIntegrationTest() *integrationTest{
 	return &integrationTest{
-		Email: email,
+		Email: Email,
 		BaseUrl: URL,
 	}
 }
@@ -100,7 +100,7 @@ func TestAuth(t *testing.T) {
 			reader := bytes.NewReader(body)
 
 			postURL := fmt.Sprintf("%s/%s",test.BaseUrl,"auth")
-			resp, err := http.Post(postURL, contentType, reader)
+			resp, err := http.Post(postURL, ContentType, reader)
 
 			if err !=nil {
 				t.Fatal(err)
