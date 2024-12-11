@@ -83,6 +83,7 @@ func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeVal
 	if err != nil {
 		log.Println(err)
 		log.Printf("Table: %v", *input.TableName)
+		log.Printf("%+v", input.Key)
 	}
 
 	return resp, err
@@ -148,6 +149,11 @@ func (db DBInfo) UpdateItem(ctx context.Context, pKey map[string]types.Attribute
 		UpdateExpression:          expr.Update(),
 		ReturnValues:              types.ReturnValueAllNew,
 	})
+
+	if err != nil {
+		log.Println(err)
+		log.Printf("%+v", pKey)
+	}
 
 	return len(resp.Attributes), err
 }

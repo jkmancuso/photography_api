@@ -79,7 +79,7 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 	token, err := returnTokenForValidAuth(context.Background(),
 		auth.Email,
 		hashpass,
-		h.DBMap["auth"])
+		h.DBMap["admins"])
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

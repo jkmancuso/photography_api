@@ -20,7 +20,7 @@ func returnTokenForValidAuth(ctx context.Context, email string, hashedPassword s
 	}
 
 	pKey := map[string]types.AttributeValue{
-		email: emailAttribute,
+		"email": emailAttribute,
 	}
 	resp, err := db.GetItem(ctx, pKey)
 
