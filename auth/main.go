@@ -22,6 +22,7 @@ var (
 	tableMap = map[string]*shared.DBInfo{}
 
 	awsCfg aws.Config
+	saltSecret = "salt"
 )
 
 func init() {
@@ -52,7 +53,7 @@ func init() {
 		}
 	}
 
-	saltStr, err := GetSalt(awsCfg)
+	saltStr, err := shared.GetSecret(awsCfg, saltSecret)
 
 	if err != nil {
 		log.Fatal(err)
