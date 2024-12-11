@@ -206,6 +206,10 @@ func (h handlerDBConn) addOrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// user provides `json:"expire_in"` which will be something like 60 (seconds)
+	// this is useful for our integration test cleanup...there is no cleanup!!
+	orderItem.ExpireAt += time.Now().Unix 
+
 	err = database.AddOrder(context.Background(), h.dbInfo, orderItem)
 
 	if err != nil {

@@ -11,6 +11,7 @@ import(
 const URL = "aws here"
 const email = "test@test.com"
 const contentType = "application/json"
+const expireIn = 60
 
 type integrationTest struct{
 	Email string
@@ -87,7 +88,7 @@ func TestAuth(t *testing.T) {
 		t.Fatalf("Got status %d, wanted %d", resp.StatusCode, http.StatusOK)
 	}
 
-	if len(resp.Header.Get("Set-Cookie"))==0{
+	if len(resp.Header.Get("Set-Cookie"))==0 {
 		t.Fatal("Set-Cookie header not returned")
 	}
 
