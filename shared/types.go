@@ -10,6 +10,12 @@ var RECORD_NOT_FOUND = GenericMsg{Message: "no records found"}
 var RECORD_IN_USE = GenericMsg{Message: "the record you are attempting to delete is in use"}
 var INVALID_USER_PASS = GenericMsg{Message: "invalid user or password"}
 
+const URL = "aws here"
+const email = "test@test.com"
+const contentType = "application/json"
+const expireIn = 60
+
+
 type GenericMsg struct {
 	Message string `json:"message"`
 }
@@ -26,4 +32,11 @@ type GenericTest struct {
 	BodyBytes []byte
 	WantStatusCode int
 	WantErrorMsg   GenericMsg
+}
+
+type integrationTest struct{
+	Email string
+	Password string
+	BaseUrl string
+	tests []GenericTest
 }

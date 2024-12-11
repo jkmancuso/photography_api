@@ -8,17 +8,7 @@ import(
 	"encoding/json"
 )
 
-const URL = "aws here"
-const email = "test@test.com"
-const contentType = "application/json"
-const expireIn = 60
 
-type integrationTest struct{
-	Email string
-	Password string
-	BaseUrl string
-	tests []GenericTest
-}
 
 func (i *integrationTest) setPassword() error{
 
@@ -39,7 +29,7 @@ func (i *integrationTest) setPassword() error{
 	i.Password = password
 }
 
-func (i *integrationTest) setup() {
+func (i *integrationTest) authSetup() {
 
 	//1. Get the testlogin password from aws secrets manager
 	err := i.setPassword()
@@ -103,7 +93,7 @@ func newIntegrationTest() *integrationTest{
 func TestAuth(t *testing.T) {
 	
 	test := newIntegrationTest()
-	test.setup()
+	test.authSetup()
 
 	for _, tt := range test.tests {
 		t.Run(tt.Name, func(t *testing.T) {
