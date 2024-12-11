@@ -45,8 +45,9 @@ func TestAuth(t *testing.T) {
 	if err !=nil {
 		t.Fatal(err)
 	}
+	reader := bytes.NewReader(body)
 
-	postURL := fmt.Sprintf("%s/%s",integrationTest.URL,"auth", body)
+	postURL := fmt.Sprintf("%s/%s",integrationTest.URL,"auth", reader)
 	resp, err := http.Post(postURL,"application/json")
 
 	if err !=nil {
