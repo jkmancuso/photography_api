@@ -58,6 +58,8 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	loginItem := shared.NewLoginItem(auth.Email)
+
+	//add a login entry for audit and set success to false
 	err = addLogin(ctx, h.DBMap["logins"], loginItem)
 
 	if err != nil {
@@ -93,6 +95,7 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Set-Cookie", fmt.Sprintf("token=%s; max-age=%d", token, 43200))
 
+	//update login success to true
 	count, err := updateLogin(ctx, h.DBMap["logins"], loginItem)
 
 	if err != nil {

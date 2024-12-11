@@ -23,7 +23,7 @@ func NewLoginItem(email string) *DBLoginItem {
 	return &DBLoginItem{
 		Email:     email,
 		LoginDate: int(time.Now().Unix()),
-		Success:   false,
+		Success:   false, //start it as false and update to true when complete
 	}
 }
 
