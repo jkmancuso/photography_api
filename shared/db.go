@@ -57,6 +57,10 @@ func (db DBInfo) DoFullScan(ctx context.Context, limit int32, lek map[string]typ
 		ExclusiveStartKey: lek,
 	})
 
+	if err != nil {
+		log.Println(err)
+	}
+
 	return resp, err
 
 }
@@ -67,6 +71,10 @@ func (db DBInfo) AddItem(ctx context.Context, item map[string]types.AttributeVal
 		TableName: &db.Tablename,
 		Item:      item,
 	})
+
+	if err != nil {
+		log.Println(err)
+	}
 
 	return err
 }
@@ -82,8 +90,6 @@ func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeVal
 
 	if err != nil {
 		log.Println(err)
-		log.Printf("Table: %v", *input.TableName)
-		log.Printf("%+v", input.Key)
 	}
 
 	return resp, err
@@ -122,7 +128,6 @@ func (db DBInfo) QueryItem(ctx context.Context, keys map[string]expression.Value
 
 	if err != nil {
 		log.Println(err)
-		log.Printf("Table: %v", *input.TableName)
 	}
 
 	return resp, err
@@ -135,6 +140,10 @@ func (db DBInfo) DeleteItem(ctx context.Context, pKey map[string]types.Attribute
 		Key:          pKey,
 		ReturnValues: types.ReturnValueAllOld,
 	})
+
+	if err != nil {
+		log.Println(err)
+	}
 
 	return len(resp.Attributes), err
 }
@@ -152,7 +161,6 @@ func (db DBInfo) UpdateItem(ctx context.Context, pKey map[string]types.Attribute
 
 	if err != nil {
 		log.Println(err)
-		log.Printf("%+v", pKey)
 	}
 
 	return len(resp.Attributes), err
