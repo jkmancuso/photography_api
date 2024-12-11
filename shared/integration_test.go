@@ -18,27 +18,39 @@ type integrationTest struct{
 	BaseUrl string
 }
 
-func (i integrationTest) setup() {
+func (i *integrationTest) setPassword() error{
+
 	var err error
 
 	awsCfg, err = NewAWSCfg()
 
 	if err != nil {
-		t.Fatal(err)
+		return(err)
 	}
 
 	password, err := GetSecret(awsCfg, "testpassword") 
 
 	if err != nil {
-		t.Fatal(err)
+		return(err)
 	}
 
 	i.Password = password
+}
+
+func (i *integrationTest) setup() {
+
+	err := i.setPassword()
+
+	if err != nil {
+		t.Fatal(err)
+	}
 
 }
-func (i integrationTest) teardown() {
+
+func (i *integrationTest) teardown() {
 	
 }
+
 
 func newIntegrationTest() *integrationTest{
 	return &integrationTest{
