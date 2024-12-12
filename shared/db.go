@@ -32,14 +32,21 @@ type DBJobItem struct {
 	Id       string `dynamodbav:"id" json:"id"`
 	JobName  string `dynamodbav:"job_name" json:"job_name"`
 	JobYear  int    `dynamodbav:"job_year" json:"job_year"`
-	ExpireAt int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"` //DynamoDB expire TTL
+	ExpireAt int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
+	/*
+		DynamoDB expire TTL
+		Using this for purging integration tests automatically
+
+		omitempty is SUPER important!
+		Without it, it will default to 0 which means every entry gets purged
+	*/
 }
 
 type DBOrderItem struct {
 	Id        string `dynamodbav:"id" json:"id"`
 	JobId     string `dynamodbav:"job_id" json:"job_id"`
 	RecordNum int    `dynamodbav:"record_num" json:"record_num"`
-	ExpireAt  int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"` //DynamoDB expire TTL
+	ExpireAt  int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
 }
 
 func NewDB(table string, cfg aws.Config) (*DBInfo, error) {
