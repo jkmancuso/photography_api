@@ -153,4 +153,27 @@ func TestE2EJob(t *testing.T) {
 
 	})
 
+	//setp 4- delete the job
+
+	for _, jobId := range idsToCheck {
+		testName := fmt.Sprintf("%s/%s", "DeleteJob", jobId)
+
+		t.Run(testName, func(t *testing.T) {
+			URL := fmt.Sprintf("%s/%s", test.Url, jobId)
+
+			req, err := http.NewRequest("DELETE", URL, nil)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			resp, err := http.DefaultClient.Do(req)
+
+			if err != nil || resp.StatusCode != http.StatusOK {
+				t.Fatalf("Error deleting job")
+			}
+
+		})
+	}
+
 }

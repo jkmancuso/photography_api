@@ -51,16 +51,18 @@ func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	orderURL := fmt.Sprintf("/orders?record_num=1&job_id=%s", id)
+	orderURL := fmt.Sprintf("/jobs/%s/orders", id)
 	orderItem, err := checkOrderHandler(orderURL)
 
 	if err != nil {
+		log.Printf("Got err1: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 		return
 	}
 
 	if len(orderItem.Id) != 0 {
+		log.Println("Got err2")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.RECORD_IN_USE)
 		return
@@ -69,12 +71,14 @@ func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) 
 	count, err := database.DeleteJob(context.Background(), h.dbInfo, id)
 
 	if err != nil {
+		log.Printf("Got err3: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 		return
 	}
 
 	if count == 0 {
+		log.Println("Got err4")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
 		return
@@ -154,7 +158,7 @@ func (h handlerDBConn) addJobHandler(w http.ResponseWriter, r *http.Request) {
 // check if an order exists using this job in case you
 // attempt to delete the job
 func checkOrderHandler(url string) (*shared.DBOrderItem, error) {
-	log.Printf("URL: %s", url)
+
 	orderItem := &shared.DBOrderItem{}
 	req, err := http.NewRequest("GET", url, nil)
 
@@ -167,11 +171,14 @@ func checkOrderHandler(url string) (*shared.DBOrderItem, error) {
 	http.DefaultServeMux.ServeHTTP(respRecorder, req)
 
 	resultBytes, err := io.ReadAll(respRecorder.Result().Body)
+	log.Println(respRecorder.Body.String())
 
 	if err != nil {
 		return orderItem, err
 	}
 
-	err = json.Unmarshal(resultBytes, &orderItem)
-	return orderItem, err
+	if err = json.Unmarshal(resultBytes, orderItem); err != nil {
+		return orderItem, err
+	}
+	return orderItem, nil
 }
