@@ -60,7 +60,7 @@ func TestAddJob(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			respRecorder := httptest.NewRecorder()
 
-			req, err := http.NewRequest("POST", "/jobs", strings.NewReader(tt.Body))
+			req, err := http.NewRequest("POST", "/jobs", strings.NewReader(tt.BodyStr))
 
 			if err != nil {
 				t.Fatal(err)
@@ -207,12 +207,12 @@ func setupAddJobTest() []shared.GenericTest {
 	return []shared.GenericTest{
 		{
 			Name:           "check valid body",
-			BodyStr:           `{"job_name":"test job", "job_year":2025}`,
+			BodyStr:        `{"job_name":"test job", "job_year":2025}`,
 			WantStatusCode: 200,
 		},
 		{
 			Name:           "check empty body",
-			BodyStr:           ``,
+			BodyStr:        ``,
 			WantStatusCode: 400,
 			WantErrorMsg:   shared.INVALID_BODY,
 		},

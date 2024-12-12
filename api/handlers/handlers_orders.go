@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
@@ -208,7 +209,7 @@ func (h handlerDBConn) addOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	// user provides `json:"expire_in"` which will be something like 60 (seconds)
 	// this is useful for our integration test cleanup...there is no cleanup!!
-	orderItem.ExpireAt += time.Now().Unix 
+	orderItem.ExpireAt += time.Now().Unix()
 
 	err = database.AddOrder(context.Background(), h.dbInfo, orderItem)
 

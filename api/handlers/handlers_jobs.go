@@ -142,7 +142,7 @@ func (h handlerDBConn) addJobHandler(w http.ResponseWriter, r *http.Request) {
 
 	// user provides `json:"expire_in"` which will be something like 60 (seconds)
 	// this is useful for our integration test cleanup...there is no cleanup!!
-	jobItem.ExpireAt += time.Now().Unix 
+	jobItem.ExpireAt += time.Now().Unix()
 
 	err = database.AddJob(context.Background(), h.dbInfo, jobItem)
 
