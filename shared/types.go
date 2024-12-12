@@ -21,6 +21,6 @@ type GenericTest struct {
 type IntegrationTest struct {
 	Email    string
 	Password string
-	BaseUrl  string
+	Url      string
 	Tests    []GenericTest
 }

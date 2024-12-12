@@ -3,28 +3,23 @@ package shared
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"testing"
 )
 
-func (i *IntegrationTest) setPassword() error {
+func (i *IntegrationTest) setCreds() error {
 
-	var err error
+	//set as env variables since most likely running locally
+	i.Email = os.Getenv("TESTLOGIN")
+	i.Password = os.Getenv("TESTPASSWORD")
 
-	awsCfg, err := NewAWSCfg()
-
-	if err != nil {
-		return (err)
+	if len(i.Email) == 0 || len(i.Password) == 0 {
+		return errors.New("Cannot find local creds")
 	}
 
-	password, err := GetSecret(awsCfg, "testlogin")
-
-	if err != nil {
-		return (err)
-	}
-
-	i.Password = password
 	return nil
 }
 
@@ -32,7 +27,7 @@ func (i *IntegrationTest) authSetup(t *testing.T) {
 	t.Helper()
 
 	//1. Get the testlogin password from aws secrets manager
-	err := i.setPassword()
+	err := i.setCreds()
 
 	if err != nil {
 		t.Fatal(err)
@@ -81,24 +76,19 @@ func (i *IntegrationTest) teardown() {
 
 }
 
-func NewIntegrationTest() *IntegrationTest {
-	return &IntegrationTest{
-		Email:   Email,
-		BaseUrl: URL,
-	}
-}
-
 func TestAuth(t *testing.T) {
 
-	test := NewIntegrationTest()
+	test := &IntegrationTest{
+		Url: fmt.Sprintf("%s/%s", API_URL, "auth"),
+	}
+
 	test.authSetup(t)
 
 	for _, tt := range test.Tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			reader := bytes.NewReader(tt.BodyBytes)
 
-			postURL := fmt.Sprintf("%s/%s", test.BaseUrl, "auth")
-			resp, err := http.Post(postURL, ContentType, reader)
+			resp, err := http.Post(test.Url, ContentType, reader)
 
 			if err != nil {
 				t.Fatal(err)
