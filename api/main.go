@@ -16,11 +16,10 @@ import (
 /* These global variables initialized below should already
 be available on lambda warm start saving on startup resource*/
 
-var httpLambda *httpadapter.HandlerAdapter
-
 var (
-	tables   = []string{"jobs", "groups", "pictures", "instruments", "orders"}
-	tableMap = map[string]*shared.DBInfo{}
+	httpLambda *httpadapter.HandlerAdapter
+	tables     = []string{"jobs", "groups", "pictures", "instruments", "orders"}
+	tableMap   = map[string]*shared.DBInfo{}
 
 	awsCfg aws.Config
 )
