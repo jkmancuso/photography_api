@@ -17,10 +17,3 @@ type GenericTest struct {
 	WantStatusCode int
 	WantErrorMsg   GenericMsg
 }
-
-type IntegrationTest struct {
-	Email    string
-	Password string
-	Url      string
-	Tests    []GenericTest
-}

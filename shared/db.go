@@ -32,14 +32,14 @@ type DBJobItem struct {
 	Id       string `dynamodbav:"id" json:"id"`
 	JobName  string `dynamodbav:"job_name" json:"job_name"`
 	JobYear  int    `dynamodbav:"job_year" json:"job_year"`
-	ExpireAt int64  `dynamodbav:"expire_at" json:"expire_in"` //DynamoDB expire TTL
+	ExpireAt int64  `dynamodbav:"expire_at" json:"expire_at"` //DynamoDB expire TTL
 }
 
 type DBOrderItem struct {
 	Id        string `dynamodbav:"id" json:"id"`
 	JobId     string `dynamodbav:"job_id" json:"job_id"`
 	RecordNum int    `dynamodbav:"record_num" json:"record_num"`
-	ExpireAt  int64  `dynamodbav:"expire_at" json:"expire_in"` //DynamoDB expire TTL
+	ExpireAt  int64  `dynamodbav:"expire_at" json:"expire_at"` //DynamoDB expire TTL
 }
 
 func NewDB(table string, cfg aws.Config) (*DBInfo, error) {

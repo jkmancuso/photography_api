@@ -10,7 +10,14 @@ import (
 	"testing"
 )
 
-func (i *IntegrationTest) setCreds() error {
+type AuthIntegrationTest struct {
+	Email    string
+	Password string
+	Url      string
+	Tests    []GenericTest
+}
+
+func (i *AuthIntegrationTest) setCreds() error {
 
 	//set as env variables since most likely running locally
 	i.Email = os.Getenv("TESTLOGIN")
@@ -23,7 +30,7 @@ func (i *IntegrationTest) setCreds() error {
 	return nil
 }
 
-func (i *IntegrationTest) authSetup(t *testing.T) {
+func (i *AuthIntegrationTest) authSetup(t *testing.T) {
 	t.Helper()
 
 	//1. Get the testlogin password from aws secrets manager
@@ -72,13 +79,9 @@ func (i *IntegrationTest) authSetup(t *testing.T) {
 
 }
 
-func (i *IntegrationTest) teardown() {
-
-}
-
 func TestAuth(t *testing.T) {
 
-	test := &IntegrationTest{
+	test := &AuthIntegrationTest{
 		Url: fmt.Sprintf("%s/%s", API_URL, "auth"),
 	}
 
@@ -103,7 +106,5 @@ func TestAuth(t *testing.T) {
 			}
 		})
 	}
-
-	defer test.teardown()
 
 }
