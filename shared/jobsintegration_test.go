@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"testing"
 	"time"
@@ -52,6 +51,7 @@ func TestE2EJob(t *testing.T) {
 	test := &JobIntegrationTest{}
 	test.jobSetup(t)
 
+	//step 1- add the job
 	for _, tt := range test.Tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			reader := bytes.NewReader(tt.BodyBytes)
@@ -90,8 +90,12 @@ func TestE2EJob(t *testing.T) {
 		})
 	}
 
+	//step 2- check its there "GetJobById"
+
 	for _, jobId := range idsToCheck {
 		testName := fmt.Sprintf("%s/%s", "GetJobById", jobId)
+
+		job := &DBJobItem{}
 
 		t.Run(testName, func(t *testing.T) {
 			URL := fmt.Sprintf("%s/%s", test.Url, jobId)
@@ -110,9 +114,43 @@ func TestE2EJob(t *testing.T) {
 				t.Fatalf("Error getting job by id")
 			}
 
-			log.Println(string(responseBody))
+			if err = json.Unmarshal(responseBody, job); err != nil {
+				t.Fatal(err)
+			}
+
+			if len(job.Id) == 0 {
+				t.Fatal("Empty result set")
+			}
 
 		})
 	}
+
+	//step 3- check GetJobs output
+	t.Run("GetJobs", func(t *testing.T) {
+		jobs := []*DBJobItem{}
+
+		resp, err := http.Get(test.Url)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		responseBody, err := io.ReadAll(resp.Body)
+
+		if err != nil || resp.StatusCode != http.StatusOK {
+			t.Fatalf("Error getting jobs")
+		}
+
+		resp.Body.Close()
+
+		if err = json.Unmarshal(responseBody, &jobs); err != nil {
+			t.Fatal(err)
+		}
+
+		if len(jobs) == 0 {
+			t.Fatal("Empty result set")
+		}
+
+	})
 
 }

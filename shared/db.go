@@ -12,8 +12,9 @@ import (
 )
 
 type DBInfo struct {
-	Tablename string
-	Client    DynamoClientInterface
+	Tablename      string
+	Client         DynamoClientInterface
+	ConsistentRead bool
 }
 
 type DBAdminItem struct {
@@ -64,6 +65,7 @@ func (db DBInfo) DoFullScan(ctx context.Context, limit int32, lek map[string]typ
 		TableName:         &db.Tablename,
 		Limit:             aws.Int32(limit),
 		ExclusiveStartKey: lek,
+		ConsistentRead:    &db.ConsistentRead,
 	})
 
 	if err != nil {
@@ -91,8 +93,9 @@ func (db DBInfo) AddItem(ctx context.Context, item map[string]types.AttributeVal
 func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeValue) (*dynamodb.GetItemOutput, error) {
 
 	input := &dynamodb.GetItemInput{
-		TableName: &db.Tablename,
-		Key:       pKey,
+		TableName:      &db.Tablename,
+		Key:            pKey,
+		ConsistentRead: &db.ConsistentRead,
 	}
 
 	resp, err := db.Client.GetItem(ctx, input)
@@ -131,6 +134,10 @@ func (db DBInfo) QueryItem(ctx context.Context, keys map[string]expression.Value
 
 	if len(gsi) != 0 {
 		input.IndexName = &gsi
+	} else {
+		//https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html
+		// Strongly consistent reads from a global secondary index is not supported.
+		input.ConsistentRead = &db.ConsistentRead
 	}
 
 	resp, err := db.Client.Query(ctx, input)

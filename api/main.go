@@ -49,6 +49,8 @@ func init() {
 				log.Fatal(err)
 			}
 
+			db.ConsistentRead = true
+
 			tableMap[name] = db
 		}
 	}
