@@ -89,7 +89,7 @@ func TestE2EJob(t *testing.T) {
 
 		})
 	}
-
+	time.Sleep(2 * time.Second)
 	//step 2- check its there "GetJobById"
 
 	for _, jobId := range idsToCheck {

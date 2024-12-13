@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
+	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -25,6 +27,11 @@ var (
 )
 
 func init() {
+
+	if loglevel, found := os.LookupEnv("LOGLEVEL"); found {
+		level, _ := log.ParseLevel(loglevel)
+		log.SetLevel(level)
+	}
 
 	var err error
 

@@ -3,7 +3,8 @@ package shared
 import (
 	"context"
 	"errors"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
@@ -52,6 +53,8 @@ type DBOrderItem struct {
 
 func NewDB(table string, cfg aws.Config) (*DBInfo, error) {
 
+	log.Debugf("Creating client for DynamoDB table: %s", table)
+
 	db := &DBInfo{Tablename: table}
 	client := dynamodb.NewFromConfig(cfg)
 	db.Client = client
@@ -60,6 +63,9 @@ func NewDB(table string, cfg aws.Config) (*DBInfo, error) {
 }
 
 func (db DBInfo) DoFullScan(ctx context.Context, limit int32, lek map[string]types.AttributeValue) (*dynamodb.ScanOutput, error) {
+
+	log.Debugf("Full scan for %s", db.Tablename)
+	log.Debugf("Start Key: %+v", lek)
 
 	resp, err := db.Client.Scan(ctx, &dynamodb.ScanInput{
 		TableName:         &db.Tablename,
@@ -78,6 +84,9 @@ func (db DBInfo) DoFullScan(ctx context.Context, limit int32, lek map[string]typ
 
 func (db DBInfo) AddItem(ctx context.Context, item map[string]types.AttributeValue) error {
 
+	log.Debugf("PutItem for table: %s", db.Tablename)
+	log.Debugf("Item is: %+v", item)
+
 	_, err := db.Client.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: &db.Tablename,
 		Item:      item,
@@ -91,6 +100,9 @@ func (db DBInfo) AddItem(ctx context.Context, item map[string]types.AttributeVal
 }
 
 func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeValue) (*dynamodb.GetItemOutput, error) {
+
+	log.Debugf("PutItem for table: %s", db.Tablename)
+	log.Debugf("Key is: %+v", pKey)
 
 	input := &dynamodb.GetItemInput{
 		TableName:      &db.Tablename,
@@ -109,6 +121,9 @@ func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeVal
 
 func (db DBInfo) QueryItem(ctx context.Context, keys map[string]expression.ValueBuilder, gsi string) (*dynamodb.QueryOutput, error) {
 
+	log.Debugf("QueryItem for table: %s", db.Tablename)
+	log.Debugf("Key is: %+v", keys)
+
 	if len(keys) != 1 && len(keys) != 2 {
 		return &dynamodb.QueryOutput{}, errors.New("unsupported key condition")
 	}
@@ -123,6 +138,7 @@ func (db DBInfo) QueryItem(ctx context.Context, keys map[string]expression.Value
 
 	if err != nil {
 		log.Printf("Couldn't build expression for query. Here's why: %v\n", err)
+		return &dynamodb.QueryOutput{}, nil
 	}
 
 	input := &dynamodb.QueryInput{
@@ -134,6 +150,8 @@ func (db DBInfo) QueryItem(ctx context.Context, keys map[string]expression.Value
 
 	if len(gsi) != 0 {
 		input.IndexName = &gsi
+		log.Debugf("Using Global Secondary Index: %s", gsi)
+
 	} else {
 		//https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html
 		// Strongly consistent reads from a global secondary index is not supported.
@@ -151,6 +169,9 @@ func (db DBInfo) QueryItem(ctx context.Context, keys map[string]expression.Value
 
 func (db DBInfo) DeleteItem(ctx context.Context, pKey map[string]types.AttributeValue) (int, error) {
 
+	log.Debugf("DeleteItem for table: %s", db.Tablename)
+	log.Debugf("Key is: %+v", pKey)
+
 	resp, err := db.Client.DeleteItem(ctx, &dynamodb.DeleteItemInput{
 		TableName:    &db.Tablename,
 		Key:          pKey,
@@ -165,6 +186,9 @@ func (db DBInfo) DeleteItem(ctx context.Context, pKey map[string]types.Attribute
 }
 
 func (db DBInfo) UpdateItem(ctx context.Context, pKey map[string]types.AttributeValue, expr expression.Expression) (int, error) {
+
+	log.Debugf("UpdateItem for table: %s", db.Tablename)
+	log.Debugf("Key is: %+v", pKey)
 
 	resp, err := db.Client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
 		TableName:                 &db.Tablename,

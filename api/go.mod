@@ -12,6 +12,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.38.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/jkmancuso/photography_api/shared v0.0.0
+	github.com/sirupsen/logrus v1.9.3
 )
 
 require (
@@ -33,5 +34,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
