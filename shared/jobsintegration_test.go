@@ -19,12 +19,7 @@ type JobIntegrationTest struct {
 func (i *JobIntegrationTest) jobSetup(t *testing.T) {
 	t.Helper()
 
-	job := &DBJobItem{
-		Id:       GenerateUUID(),
-		JobName:  "integrationtest_job",
-		JobYear:  time.Now().Year(),
-		ExpireAt: time.Now().Unix() + ExpireIn,
-	}
+	job := returnDBItem("jobs")
 
 	body, err := json.Marshal(job)
 
