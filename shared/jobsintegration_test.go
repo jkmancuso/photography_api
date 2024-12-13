@@ -10,13 +10,12 @@ import (
 	"time"
 )
 
-type JobIntegrationTest struct {
-	Job   *DBJobItem
+type IntegrationTest struct {
 	Url   string
 	Tests []GenericTest
 }
 
-func (i *JobIntegrationTest) jobSetup(t *testing.T) {
+func (i *IntegrationTest) setup(t *testing.T) {
 	t.Helper()
 
 	job := returnDBItem("jobs")
@@ -43,8 +42,8 @@ func TestE2EJob(t *testing.T) {
 	idsToCheck := []string{}
 	returnedJob := &DBJobItem{}
 
-	test := &JobIntegrationTest{}
-	test.jobSetup(t)
+	test := &IntegrationTest{}
+	test.setup(t)
 
 	//step 1- add the job
 	for _, tt := range test.Tests {
