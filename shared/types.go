@@ -17,3 +17,7 @@ type GenericTest struct {
 	WantStatusCode int
 	WantErrorMsg   GenericMsg
 }
+
+type IdOnly struct {
+	Id string `json:"id"`
+}

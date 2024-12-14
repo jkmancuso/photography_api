@@ -3,7 +3,6 @@ package shared
 import (
 	"context"
 	"errors"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -19,7 +18,6 @@ type DBInfo struct {
 	ConsistentRead bool
 }
 
-
 type DBAdminItem struct {
 	Email    string `dynamodbav:"email" json:"email"`
 	Hashpass string `dynamodbav:"hashpass" json:"hashpass"`
@@ -32,12 +30,8 @@ type DBLoginItem struct {
 	Success   bool   `dynamodbav:"success"`
 }
 
-type DBItemInterface interface{
-	Unused()
-}
-
 type DBJobItem struct {
-	Id       string `dynamodbav:"id" json:"id"`
+	Id       string `dynamodbav:"id" json:"id,omitempty"`
 	JobName  string `dynamodbav:"job_name" json:"job_name"`
 	JobYear  int    `dynamodbav:"job_year" json:"job_year"`
 	ExpireAt int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
@@ -50,32 +44,11 @@ type DBJobItem struct {
 	*/
 }
 
-func (i DBJobItem) Unused(){
-
-}
-
 type DBOrderItem struct {
-	Id        string `dynamodbav:"id" json:"id"`
+	Id        string `dynamodbav:"id" json:"id,omitempty"`
 	JobId     string `dynamodbav:"job_id" json:"job_id"`
 	RecordNum int    `dynamodbav:"record_num" json:"record_num"`
 	ExpireAt  int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
-}
-
-func (i DBOrderItem) Unused(){
-
-}
-
-func returnDBItem(type string) *DBItemInterface{
-	var item *DBItemInterface
-
-	if type == "jobs" {
-		item = NewJobItem()
-		item.JobName = "integrationtest_job"
-		item.JobYear = time.Now().Year(),
-		item.ExpireAt = time.Now().Unix() + ExpireIn,
-	}
-
-	return item
 }
 
 func NewDB(table string, cfg aws.Config) (*DBInfo, error) {

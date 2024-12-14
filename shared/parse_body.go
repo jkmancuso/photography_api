@@ -14,6 +14,29 @@ func NewJobItem() *DBJobItem {
 	}
 }
 
+func NewQAJobItem() []byte {
+	jobItem := &DBJobItem{}
+
+	jobItem.JobName = "IntegrationTest_Job"
+	jobItem.JobYear = time.Now().Year()
+	jobItem.ExpireAt = ExpireIn + time.Now().Unix()
+
+	result, _ := json.Marshal(jobItem)
+
+	return result
+}
+
+func NewDBItem(table string) []byte {
+	var b []byte
+
+	switch table {
+	case "jobs":
+		b = NewQAJobItem()
+	}
+
+	return b
+}
+
 func NewOrderItem() *DBOrderItem {
 	return &DBOrderItem{
 		Id: GenerateUUID(),

@@ -3,8 +3,10 @@ package shared
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"testing"
 	"time"
@@ -18,29 +20,38 @@ type IntegrationTest struct {
 func (i *IntegrationTest) setup(t *testing.T) {
 	t.Helper()
 
-	job := returnDBItem("jobs")
+	testName := flag.String("name", "jobs", "[jobs, orders, etc]")
+	flag.Parse()
 
-	body, err := json.Marshal(job)
+	//populated item
+	validPayload := NewDBItem(*testName)
+	log.Println(string(validPayload))
 
-	if err != nil {
-		t.Fatal(err)
-	}
+	//empty item
+	invalidPayload := []byte(``)
 
 	i.Tests = []GenericTest{
 		{
-			Name:           "valid job",
-			BodyBytes:      body,
+			Name:           "POST valid request body",
+			BodyBytes:      validPayload,
 			WantStatusCode: 200,
+		},
+		{
+			Name:           "POST invalid request body",
+			BodyBytes:      invalidPayload,
+			WantStatusCode: 400,
 		},
 	}
 
-	i.Url = fmt.Sprintf("%s/%s", API_URL, "jobs")
+	i.Url = fmt.Sprintf("%s/%s", API_URL, *testName)
 }
 
-func TestE2EJob(t *testing.T) {
+func TestE2E(t *testing.T) {
 
 	idsToCheck := []string{}
-	returnedJob := &DBJobItem{}
+
+	//dont need a full struct, just check Id is there is fine
+	returnedItem := &IdOnly{}
 
 	test := &IntegrationTest{}
 	test.setup(t)
@@ -69,15 +80,15 @@ func TestE2EJob(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				if err = json.Unmarshal(responseBody, returnedJob); err != nil {
+				if err = json.Unmarshal(responseBody, returnedItem); err != nil {
 					t.Fatal(err)
 				}
 
-				if len(returnedJob.Id) == 0 {
-					t.Fatal("Returned Job is empty")
+				if len(returnedItem.Id) == 0 {
+					t.Fatal("Returned Item is empty")
 				}
 
-				idsToCheck = append(idsToCheck, returnedJob.Id)
+				idsToCheck = append(idsToCheck, returnedItem.Id)
 
 			}
 
@@ -86,13 +97,13 @@ func TestE2EJob(t *testing.T) {
 	time.Sleep(2 * time.Second)
 	//step 2- check its there "GetJobById"
 
-	for _, jobId := range idsToCheck {
-		testName := fmt.Sprintf("%s/%s", "GetJobById", jobId)
+	for _, Id := range idsToCheck {
+		testName := fmt.Sprintf("%s/%s", "GetJobById", Id)
 
-		job := &DBJobItem{}
+		returnedItem := &IdOnly{}
 
 		t.Run(testName, func(t *testing.T) {
-			URL := fmt.Sprintf("%s/%s", test.Url, jobId)
+			URL := fmt.Sprintf("%s/%s", test.Url, Id)
 
 			resp, err := http.Get(URL)
 
@@ -108,11 +119,11 @@ func TestE2EJob(t *testing.T) {
 				t.Fatalf("Error getting job by id")
 			}
 
-			if err = json.Unmarshal(responseBody, job); err != nil {
+			if err = json.Unmarshal(responseBody, returnedItem); err != nil {
 				t.Fatal(err)
 			}
 
-			if len(job.Id) == 0 {
+			if len(returnedItem.Id) == 0 {
 				t.Fatal("Empty result set")
 			}
 
@@ -121,7 +132,7 @@ func TestE2EJob(t *testing.T) {
 
 	//step 3- check GetJobs output
 	t.Run("GetJobs", func(t *testing.T) {
-		jobs := []*DBJobItem{}
+		returnedItems := []*IdOnly{}
 
 		resp, err := http.Get(test.Url)
 
@@ -137,11 +148,11 @@ func TestE2EJob(t *testing.T) {
 
 		resp.Body.Close()
 
-		if err = json.Unmarshal(responseBody, &jobs); err != nil {
+		if err = json.Unmarshal(responseBody, &returnedItems); err != nil {
 			t.Fatal(err)
 		}
 
-		if len(jobs) == 0 {
+		if len(returnedItems) == 0 {
 			t.Fatal("Empty result set")
 		}
 
@@ -149,11 +160,11 @@ func TestE2EJob(t *testing.T) {
 
 	//setp 4- delete the job
 
-	for _, jobId := range idsToCheck {
-		testName := fmt.Sprintf("%s/%s", "DeleteJob", jobId)
+	for _, Id := range idsToCheck {
+		testName := fmt.Sprintf("%s/%s", "DeleteJob", Id)
 
 		t.Run(testName, func(t *testing.T) {
-			URL := fmt.Sprintf("%s/%s", test.Url, jobId)
+			URL := fmt.Sprintf("%s/%s", test.Url, Id)
 
 			req, err := http.NewRequest("DELETE", URL, nil)
 

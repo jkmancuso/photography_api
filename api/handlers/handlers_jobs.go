@@ -134,7 +134,7 @@ func (h handlerDBConn) addJobHandler(w http.ResponseWriter, r *http.Request) {
 	jobItem, err := shared.ParseBodyIntoNewJob(bytesBody)
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 		return
 	}
