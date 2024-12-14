@@ -33,4 +33,6 @@ require (
 	github.com/aws/smithy-go v1.22.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 )

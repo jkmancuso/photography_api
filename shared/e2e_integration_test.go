@@ -3,7 +3,6 @@ package shared
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -15,16 +14,14 @@ import (
 type IntegrationTest struct {
 	Url   string
 	Tests []GenericTest
+	Table string
 }
 
 func (i *IntegrationTest) setup(t *testing.T) {
 	t.Helper()
 
-	testName := flag.String("name", "jobs", "[jobs, orders, etc]")
-	flag.Parse()
-
 	//populated item
-	validPayload := NewDBItem(*testName)
+	validPayload := NewDBItem(i.Table)
 	log.Println(string(validPayload))
 
 	//empty item
@@ -43,7 +40,7 @@ func (i *IntegrationTest) setup(t *testing.T) {
 		},
 	}
 
-	i.Url = fmt.Sprintf("%s/%s", API_URL, *testName)
+	i.Url = fmt.Sprintf("%s/%s", API_URL, i.Table)
 }
 
 func TestE2E(t *testing.T) {
@@ -53,7 +50,9 @@ func TestE2E(t *testing.T) {
 	//dont need a full struct, just check Id is there is fine
 	returnedItem := &IdOnly{}
 
-	test := &IntegrationTest{}
+	test := &IntegrationTest{
+		Table: "orders",
+	}
 	test.setup(t)
 
 	//step 1- add the item
@@ -98,7 +97,7 @@ func TestE2E(t *testing.T) {
 	//step 2- check its there "Get[Job|Order|etc]ById"
 
 	for _, Id := range idsToCheck {
-		testName := fmt.Sprintf("%s/%s", "GetJobById", Id)
+		testName := fmt.Sprintf("Get%sById/%s", test.Table, Id)
 
 		returnedItem := &IdOnly{}
 
@@ -131,7 +130,9 @@ func TestE2E(t *testing.T) {
 	}
 
 	//step 3- check GetJobs output
-	t.Run("GetJobs", func(t *testing.T) {
+	testName := fmt.Sprintf("Get%s", test.Table)
+
+	t.Run(testName, func(t *testing.T) {
 		returnedItems := []*IdOnly{}
 
 		resp, err := http.Get(test.Url)
@@ -161,7 +162,7 @@ func TestE2E(t *testing.T) {
 	//setp 4- delete the job
 
 	for _, Id := range idsToCheck {
-		testName := fmt.Sprintf("%s/%s", "DeleteJob", Id)
+		testName := fmt.Sprintf("Delete%s/%s", test.Table, Id)
 
 		t.Run(testName, func(t *testing.T) {
 			URL := fmt.Sprintf("%s/%s", test.Url, Id)
