@@ -12,16 +12,16 @@ import (
 )
 
 type IntegrationTest struct {
-	Url   string
-	Tests []GenericTest
-	Table string
+	Url          string
+	Tests        []GenericTest
+	EndpointName string //this is [orders|jobs|etc]
 }
 
 func (i *IntegrationTest) setup(t *testing.T) {
 	t.Helper()
 
 	//populated item
-	validPayload := NewDBItem(i.Table)
+	validPayload := NewDBItem(i.EndpointName)
 	log.Println(string(validPayload))
 
 	//empty item
@@ -40,7 +40,7 @@ func (i *IntegrationTest) setup(t *testing.T) {
 		},
 	}
 
-	i.Url = fmt.Sprintf("%s/%s", API_URL, i.Table)
+	i.Url = fmt.Sprintf("%s/%s", API_URL, i.EndpointName)
 }
 
 func TestE2E(t *testing.T) {
@@ -51,7 +51,7 @@ func TestE2E(t *testing.T) {
 	returnedItem := &IdOnly{}
 
 	test := &IntegrationTest{
-		Table: "orders",
+		EndpointName: "orders",
 	}
 	test.setup(t)
 
@@ -97,7 +97,7 @@ func TestE2E(t *testing.T) {
 	//step 2- check its there "Get[Job|Order|etc]ById"
 
 	for _, Id := range idsToCheck {
-		testName := fmt.Sprintf("Get%sById/%s", test.Table, Id)
+		testName := fmt.Sprintf("Get%sById/%s", test.EndpointName, Id)
 
 		returnedItem := &IdOnly{}
 
@@ -130,7 +130,7 @@ func TestE2E(t *testing.T) {
 	}
 
 	//step 3- check Get[Item]s output
-	testName := fmt.Sprintf("Get%s", test.Table)
+	testName := fmt.Sprintf("Get%s", test.EndpointName)
 
 	t.Run(testName, func(t *testing.T) {
 		returnedItems := []*IdOnly{}
@@ -144,7 +144,7 @@ func TestE2E(t *testing.T) {
 		responseBody, err := io.ReadAll(resp.Body)
 
 		if err != nil || resp.StatusCode != http.StatusOK {
-			t.Fatalf("Error getting %s", test.Table)
+			t.Fatalf("Error getting %s", test.EndpointName)
 		}
 
 		resp.Body.Close()
@@ -162,7 +162,7 @@ func TestE2E(t *testing.T) {
 	//setp 4- delete the item
 
 	for _, Id := range idsToCheck {
-		testName := fmt.Sprintf("Delete%s/%s", test.Table, Id)
+		testName := fmt.Sprintf("Delete%s/%s", test.EndpointName, Id)
 
 		t.Run(testName, func(t *testing.T) {
 			URL := fmt.Sprintf("%s/%s", test.Url, Id)
@@ -176,7 +176,7 @@ func TestE2E(t *testing.T) {
 			resp, err := http.DefaultClient.Do(req)
 
 			if err != nil || resp.StatusCode != http.StatusOK {
-				t.Fatalf("Error deleting %s", test.Table)
+				t.Fatalf("Error deleting %s", test.EndpointName)
 			}
 
 		})
