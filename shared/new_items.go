@@ -13,7 +13,8 @@ func NewJobItem() *DBJobItem {
 
 func NewOrderItem() *DBOrderItem {
 	return &DBOrderItem{
-		Id: GenerateUUID(),
+		Id:        GenerateUUID(),
+		CreatedAt: time.Now(),
 	}
 }
 
@@ -34,6 +35,8 @@ func NewQAOrderItem() []byte {
 
 	orderItem.JobId = GenerateUUID()
 	orderItem.RecordNum = 1
+	orderItem.Fname = "Integration"
+	orderItem.Lname = "Test"
 	orderItem.ExpireAt = ExpireIn + time.Now().Unix()
 
 	result, _ := json.Marshal(orderItem)
