@@ -115,7 +115,7 @@ func TestE2E(t *testing.T) {
 			resp.Body.Close()
 
 			if err != nil || resp.StatusCode != http.StatusOK {
-				t.Fatalf("Error getting job by id")
+				t.Fatalf("Error getting by id")
 			}
 
 			if err = json.Unmarshal(responseBody, returnedItem); err != nil {
@@ -129,7 +129,7 @@ func TestE2E(t *testing.T) {
 		})
 	}
 
-	//step 3- check GetJobs output
+	//step 3- check Get[Item]s output
 	testName := fmt.Sprintf("Get%s", test.Table)
 
 	t.Run(testName, func(t *testing.T) {
@@ -144,7 +144,7 @@ func TestE2E(t *testing.T) {
 		responseBody, err := io.ReadAll(resp.Body)
 
 		if err != nil || resp.StatusCode != http.StatusOK {
-			t.Fatalf("Error getting jobs")
+			t.Fatalf("Error getting %s", test.Table)
 		}
 
 		resp.Body.Close()
@@ -159,7 +159,7 @@ func TestE2E(t *testing.T) {
 
 	})
 
-	//setp 4- delete the job
+	//setp 4- delete the item
 
 	for _, Id := range idsToCheck {
 		testName := fmt.Sprintf("Delete%s/%s", test.Table, Id)
@@ -176,7 +176,7 @@ func TestE2E(t *testing.T) {
 			resp, err := http.DefaultClient.Do(req)
 
 			if err != nil || resp.StatusCode != http.StatusOK {
-				t.Fatalf("Error deleting job")
+				t.Fatalf("Error deleting %s", test.Table)
 			}
 
 		})
