@@ -16,6 +16,27 @@ import (
 	"github.com/jkmancuso/photography_api/shared"
 )
 
+// Large row count, this endpoint shouldn't really be used in prod
+func (h handlerDBConn) getOrdersHandler(w http.ResponseWriter, r *http.Request) {
+
+	items, count, err := database.GetOrders(context.Background(), h.dbInfo)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
+	}
+
+	if count == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
+		return
+	}
+
+	json.NewEncoder(w).Encode(items)
+
+}
+
 func (h handlerDBConn) deleteOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")

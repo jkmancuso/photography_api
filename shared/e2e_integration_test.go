@@ -56,7 +56,7 @@ func TestE2E(t *testing.T) {
 	test := &IntegrationTest{}
 	test.setup(t)
 
-	//step 1- add the job
+	//step 1- add the item
 	for _, tt := range test.Tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			reader := bytes.NewReader(tt.BodyBytes)
@@ -95,7 +95,7 @@ func TestE2E(t *testing.T) {
 		})
 	}
 	time.Sleep(2 * time.Second)
-	//step 2- check its there "GetJobById"
+	//step 2- check its there "Get[Job|Order|etc]ById"
 
 	for _, Id := range idsToCheck {
 		testName := fmt.Sprintf("%s/%s", "GetJobById", Id)

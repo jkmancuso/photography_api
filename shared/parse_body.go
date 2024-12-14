@@ -3,53 +3,9 @@ package shared
 import (
 	"encoding/json"
 	"errors"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 )
-
-func NewJobItem() *DBJobItem {
-	return &DBJobItem{
-		Id: GenerateUUID(),
-	}
-}
-
-func NewQAJobItem() []byte {
-	jobItem := &DBJobItem{}
-
-	jobItem.JobName = "IntegrationTest_Job"
-	jobItem.JobYear = time.Now().Year()
-	jobItem.ExpireAt = ExpireIn + time.Now().Unix()
-
-	result, _ := json.Marshal(jobItem)
-
-	return result
-}
-
-func NewDBItem(table string) []byte {
-	var b []byte
-
-	switch table {
-	case "jobs":
-		b = NewQAJobItem()
-	}
-
-	return b
-}
-
-func NewOrderItem() *DBOrderItem {
-	return &DBOrderItem{
-		Id: GenerateUUID(),
-	}
-}
-
-func NewLoginItem(email string) *DBLoginItem {
-	return &DBLoginItem{
-		Email:     email,
-		LoginDate: int(time.Now().Unix()),
-		Success:   false, //start it as false and update to true when complete
-	}
-}
 
 func ParseBodyIntoNewJob(body []byte) (*DBJobItem, error) {
 	jobItem := NewJobItem()

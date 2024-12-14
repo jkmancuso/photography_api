@@ -89,3 +89,44 @@ func GetOrderByPKey(ctx context.Context, db *shared.DBInfo, pKey map[string]type
 
 	return orderItem, len(resp.Item), nil
 }
+
+func GetOrders(ctx context.Context, db *shared.DBInfo) ([]*shared.DBOrderItem, int, error) {
+
+	var lek map[string]types.AttributeValue
+	var items []*shared.DBOrderItem
+
+	/*
+		/orders endpoint shouldnt be used in production, only E2E test
+		orders table can grow to tens of thousands over time
+	*/
+	const MAX_DB_ITEMS = 10
+	const MAX_LOOP = 10
+
+	//add max just in case of inifinte loop, "should break" before then
+	for i := 0; i < MAX_LOOP; i++ {
+
+		orderPage := []*shared.DBOrderItem{}
+
+		resp, err := db.DoFullScan(ctx, MAX_DB_ITEMS, lek)
+
+		if err != nil {
+			return items, 0, err
+		}
+
+		err = attributevalue.UnmarshalListOfMaps(resp.Items, &orderPage)
+
+		if err != nil {
+			return items, 0, err
+		}
+
+		items = append(items, orderPage...)
+
+		lek = resp.LastEvaluatedKey
+
+		if len(lek) == 0 {
+			break
+		}
+	}
+
+	return items, len(items), nil
+}

@@ -8,9 +8,6 @@ import (
 	"github.com/jkmancuso/photography_api/shared"
 )
 
-const MAX_DB_ITEMS = 100
-const MAX_LOOP = 100
-
 func AddJob(ctx context.Context, db *shared.DBInfo, job *shared.DBJobItem) error {
 
 	item, err := attributevalue.MarshalMap(job)
@@ -41,6 +38,9 @@ func GetJobs(ctx context.Context, db *shared.DBInfo) ([]*shared.DBJobItem, int, 
 
 	var lek map[string]types.AttributeValue
 	var items []*shared.DBJobItem
+
+	const MAX_DB_ITEMS = 200
+	const MAX_LOOP = 200
 
 	//add max just in case of inifinte loop, "should break" before then
 	for i := 0; i < MAX_LOOP; i++ {
