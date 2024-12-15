@@ -125,23 +125,30 @@ func (h handlerDBConn) addJobHandler(w http.ResponseWriter, r *http.Request) {
 	bytesBody, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
+	//1. validate payload
 	if len(bytesBody) == 0 || err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.INVALID_BODY)
 		return
 	}
 
-	jobItem, err := shared.ParseBodyIntoNewJob(bytesBody)
-
-	if err != nil {
+	//2. Unmarshall into an job
+	jobItem := shared.NewJobItem()
+	if err := json.Unmarshal(bytesBody, jobItem); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 		return
 	}
 
-	err = database.AddJob(context.Background(), h.dbInfo, jobItem)
+	//3. validate job is not empty
+	if len(jobItem.Id) == 0 || len(jobItem.JobName) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.INVALID_BODY)
+		return
+	}
 
-	if err != nil {
+	//4. finally, add to DB
+	if err = database.AddJob(context.Background(), h.dbInfo, jobItem); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 		return

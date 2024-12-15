@@ -28,4 +28,5 @@ func SetupRoutes(tableMap map[string]*shared.DBInfo) {
 	http.HandleFunc("GET /orders/{id}", ordersDBConn.getOrderByIdHandler)
 	http.HandleFunc("DELETE /orders/{id}", ordersDBConn.deleteOrderHandler)
 	http.HandleFunc("POST /orders", ordersDBConn.addOrderHandler)
+	http.HandleFunc("PATCH /orders/{id}", ordersDBConn.updateOrderHandler)
 }

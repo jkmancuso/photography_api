@@ -2,6 +2,9 @@ package database
 
 import (
 	"context"
+	"fmt"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
@@ -33,6 +36,41 @@ func AddOrder(ctx context.Context, db *shared.DBInfo, order *shared.DBOrderItem)
 
 	err = db.AddItem(ctx, item)
 	return err
+}
+
+func UpdateOrder(ctx context.Context, db *shared.DBInfo, order map[string]interface{}) (int, error) {
+
+	idAttr, err := attributevalue.Marshal(order["id"])
+
+	if err != nil {
+		return 0, err
+	}
+
+	pKey := map[string]types.AttributeValue{"id": idAttr}
+
+	delete(order, "id") //so you dont loop over it below
+
+	var update expression.UpdateBuilder
+
+	for k, v := range order {
+		update = update.Set(expression.Name(k), expression.Value(v))
+		fmt.Printf("KEY: %v  VAL: %v", k, v)
+	}
+
+	expr, err := expression.NewBuilder().WithUpdate(update).Build()
+
+	if err != nil {
+		log.Printf("Couldn't build expression for update. Here's why: %v\n", err)
+		return 0, err
+	}
+
+	count, err := db.UpdateItem(ctx, pKey, expr)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 // Global secondary index supports Query, not GetItem

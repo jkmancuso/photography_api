@@ -9,6 +9,8 @@ import (
 	"net/http/httptest"
 	"strconv"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
@@ -54,6 +56,65 @@ func (h handlerDBConn) deleteOrderHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	count, err := database.DeleteOrder(context.Background(), h.dbInfo, id)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
+	}
+
+	if count == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
+		return
+	}
+
+	json.NewEncoder(w).Encode(shared.GenericMsg{Message: "OK"})
+
+}
+
+func (h handlerDBConn) updateOrderHandler(w http.ResponseWriter, r *http.Request) {
+
+	// 1. check valid id in /orders{id} path
+	id := r.PathValue("id")
+
+	if len(id) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
+		return
+	}
+
+	if !shared.IsUUID(id) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
+		return
+	}
+
+	// 2. check valid body which should be the params to change
+	bytesBody, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if len(bytesBody) == 0 || err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.INVALID_BODY)
+		return
+	}
+
+	// 3. orderItem has the params to change
+	orderItem := make(map[string]interface{})
+
+	if err := json.Unmarshal(bytesBody, &orderItem); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
+	}
+
+	orderItem["id"] = id
+
+	log.Printf("%+v", orderItem)
+
+	// 4. update DB
+	count, err := database.UpdateOrder(context.Background(), h.dbInfo, orderItem)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -204,19 +265,29 @@ func (h handlerDBConn) addOrderHandler(w http.ResponseWriter, r *http.Request) {
 	bytesBody, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
+	//1. validate payload
 	if len(bytesBody) == 0 || err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.INVALID_BODY)
 		return
 	}
 
-	orderItem, err := shared.ParseBodyIntoNewOrder(bytesBody)
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+	//2. Unmarshall into an order
+	orderItem := shared.NewOrderItem()
+	if err = json.Unmarshal(bytesBody, orderItem); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 		return
 	}
+
+	//3. validate required fields
+	if len(orderItem.Id) == 0 || len(orderItem.JobId) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.INVALID_BODY)
+		return
+	}
+
+	//4. check that the job id in the order exists
 
 	// skip this check if you are doing your e2e test, just add it
 	if orderItem.Fname != "Integration" && orderItem.Lname != "Test" {
@@ -231,6 +302,7 @@ func (h handlerDBConn) addOrderHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//5. finally, add to DB
 	err = database.AddOrder(context.Background(), h.dbInfo, orderItem)
 
 	if err != nil {
