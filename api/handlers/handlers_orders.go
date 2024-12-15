@@ -9,8 +9,6 @@ import (
 	"net/http/httptest"
 	"strconv"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
@@ -110,8 +108,6 @@ func (h handlerDBConn) updateOrderHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	orderItem["id"] = id
-
-	log.Printf("%+v", orderItem)
 
 	// 4. update DB
 	count, err := database.UpdateOrder(context.Background(), h.dbInfo, orderItem)

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"testing"
 	"time"
@@ -22,7 +21,6 @@ func (i *IntegrationTest) setup(t *testing.T) {
 
 	//populated item
 	validPayload := NewDBItem(i.EndpointName)
-	log.Println(string(validPayload))
 
 	//empty item
 	invalidPayload := []byte(``)
