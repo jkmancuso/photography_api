@@ -51,3 +51,23 @@ type DBOrderItem struct {
 	CreatedAt            time.Time `dynamodbav:"created_at,omitempty"`
 	ExpireAt             int64     `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
 }
+
+type DBGroupItem struct {
+	Id        string `dynamodbav:"id" json:"id,omitempty"`
+	GroupName string `dynamodbav:"group_name" json:"group_name,omitempty"`
+	ExpireAt  int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
+}
+
+type DBInstrumentItem struct {
+	Id             string `dynamodbav:"id" json:"id,omitempty"`
+	InstrumentName string `dynamodbav:"instrument_name" json:"instrument_name,omitempty"`
+	Section        string `dynamodbav:"section" json:"section,omitempty"`
+	ExpireAt       int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
+}
+
+type DBPictureItem struct {
+	Id         string `dynamodbav:"id" json:"id,omitempty"`
+	PictureNum string `dynamodbav:"picture_num" json:"picture_num,omitempty"`
+	Section    string `dynamodbav:"section" json:"section,omitempty"`
+	ExpireAt   int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
+}

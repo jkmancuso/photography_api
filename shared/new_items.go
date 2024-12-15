@@ -18,8 +18,26 @@ func NewOrderItem() *DBOrderItem {
 	}
 }
 
+func NewInstrumentItem() *DBInstrumentItem {
+	return &DBInstrumentItem{
+		Id: GenerateUUID(),
+	}
+}
+
+func NewPictureItem() *DBPictureItem {
+	return &DBPictureItem{
+		Id: GenerateUUID(),
+	}
+}
+
+func NewGroupItem() *DBGroupItem {
+	return &DBGroupItem{
+		Id: GenerateUUID(),
+	}
+}
+
 func NewQAJobItem() []byte {
-	jobItem := &DBJobItem{}
+	jobItem := NewJobItem()
 
 	jobItem.JobName = "IntegrationTest_Job"
 	jobItem.JobYear = time.Now().Year()
@@ -31,7 +49,7 @@ func NewQAJobItem() []byte {
 }
 
 func NewQAOrderItem() []byte {
-	orderItem := &DBOrderItem{}
+	orderItem := NewOrderItem()
 
 	orderItem.JobId = GenerateUUID()
 	orderItem.RecordNum = 1
@@ -44,6 +62,41 @@ func NewQAOrderItem() []byte {
 	return result
 }
 
+func NewQAGroupItem() []byte {
+	groupItem := NewGroupItem()
+
+	groupItem.GroupName = "Integration Test Group"
+	groupItem.ExpireAt = ExpireIn + time.Now().Unix()
+
+	result, _ := json.Marshal(groupItem)
+
+	return result
+}
+
+func NewQAPictureItem() []byte {
+	pictureItem := NewPictureItem()
+
+	pictureItem.PictureNum = "Integration Test"
+	pictureItem.Section = "Integration Test Section"
+	pictureItem.ExpireAt = ExpireIn + time.Now().Unix()
+
+	result, _ := json.Marshal(pictureItem)
+
+	return result
+}
+
+func NewQAInstrumentItem() []byte {
+	instrumentItem := NewInstrumentItem()
+
+	instrumentItem.InstrumentName = "Integration Test"
+	instrumentItem.Section = "Integration Test"
+	instrumentItem.ExpireAt = ExpireIn + time.Now().Unix()
+
+	result, _ := json.Marshal(instrumentItem)
+
+	return result
+}
+
 func NewDBItem(table string) []byte {
 	var b []byte
 
@@ -52,6 +105,12 @@ func NewDBItem(table string) []byte {
 		b = NewQAJobItem()
 	case "orders":
 		b = NewQAOrderItem()
+	case "groups":
+		b = NewQAGroupItem()
+	case "pictures":
+		b = NewQAPictureItem()
+	case "instruments":
+		b = NewQAInstrumentItem()
 
 	}
 
