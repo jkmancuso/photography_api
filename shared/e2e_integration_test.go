@@ -51,6 +51,7 @@ func TestE2E(t *testing.T) {
 	test := &IntegrationTest{
 		EndpointName: "orders",
 	}
+
 	test.setup(t)
 
 	//step 1- add the item
