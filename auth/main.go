@@ -21,7 +21,7 @@ var (
 	tables   = []string{"logins", "admins"}
 	tableMap = map[string]*shared.DBInfo{}
 
-	awsCfg aws.Config
+	awsCfg     aws.Config
 	saltSecret = "salt"
 )
 
@@ -61,10 +61,11 @@ func init() {
 
 	h := newHandlerMetadata(saltStr, tableMap)
 
-	http.HandleFunc("GET /ping", ping)
-	http.HandleFunc("POST /auth", h.postAuth)
+	mux := http.DefaultServeMux
+	mux.Handle("GET /ping", corsMiddleware(http.HandlerFunc(ping)))
+	mux.Handle("POST /auth", corsMiddleware(http.HandlerFunc(h.postAuth)))
 
-	httpLambda = httpadapter.New(http.DefaultServeMux)
+	httpLambda = httpadapter.New(mux)
 
 }
 func main() {
