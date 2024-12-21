@@ -62,8 +62,8 @@ func init() {
 	h := newHandlerMetadata(saltStr, tableMap)
 
 	mux := http.DefaultServeMux
-	mux.Handle("GET /ping", corsMiddleware(http.HandlerFunc(ping)))
-	mux.Handle("POST /auth", corsMiddleware(http.HandlerFunc(h.postAuth)))
+	mux.Handle("GET /ping", shared.CorsMiddleware(http.HandlerFunc(ping)))
+	mux.Handle("POST /auth", shared.CorsMiddleware(http.HandlerFunc(h.postAuth)))
 
 	httpLambda = httpadapter.New(mux)
 

@@ -22,16 +22,6 @@ func newHandlerMetadata(salt string, DB map[string]*shared.DBInfo) *handlerMetad
 	}
 }
 
-func corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token")
-		w.Header().Set("Access-Control-Allow-Methods", "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT")
-
-		next.ServeHTTP(w, r)
-	})
-}
-
 func ping(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(shared.GenericMsg{Message: "pong"})

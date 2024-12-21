@@ -61,9 +61,10 @@ func init() {
 		}
 	}
 
-	handlers.SetupRoutes(tableMap)
+	mux := http.DefaultServeMux
+	handlers.SetupRoutes(tableMap, mux)
 
-	httpLambda = httpadapter.New(http.DefaultServeMux)
+	httpLambda = httpadapter.New(mux)
 
 }
 func main() {
