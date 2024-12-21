@@ -239,7 +239,7 @@ func (h handlerDBConn) getOrdersByJobIDHandler(w http.ResponseWriter, r *http.Re
 	}
 
 	GSI := "job_id-index"
-	items, count, err := database.GetOrdersByGSI(context.Background(), h.dbInfo, key, GSI)
+	items, _, err := database.GetOrdersByGSI(context.Background(), h.dbInfo, key, GSI)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -247,11 +247,13 @@ func (h handlerDBConn) getOrdersByJobIDHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	/*I decided to make this a supported operation ie where you query but no records
 	if count == 0 {
+
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
 		return
-	}
+	}*/
 
 	json.NewEncoder(w).Encode(items)
 
