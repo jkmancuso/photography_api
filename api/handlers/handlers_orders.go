@@ -238,7 +238,7 @@ func (h handlerDBConn) getOrdersByJobIDHandler(w http.ResponseWriter, r *http.Re
 		"job_id": expression.Value(jobId),
 	}
 
-	GSI := "job_id-index"
+	GSI := "job_id-record_num-index"
 	items, _, err := database.GetOrdersByGSI(context.Background(), h.dbInfo, key, GSI)
 
 	if err != nil {
