@@ -17,6 +17,7 @@ func SetupRoutes(tableMap map[string]*shared.DBInfo, mux *http.ServeMux) {
 	picturesDBConn := handlerDBConn{dbInfo: tableMap["pictures"]}
 	groupsDBConn := handlerDBConn{dbInfo: tableMap["groups"]}
 	ordersDBConn := handlerDBConn{dbInfo: tableMap["orders"]}
+	zipcodesDBConn := handlerDBConn{dbInfo: tableMap["zipcodes"]}
 
 	/*JOBS*/
 	mux.Handle("GET /jobs",
@@ -73,4 +74,7 @@ func SetupRoutes(tableMap map[string]*shared.DBInfo, mux *http.ServeMux) {
 		shared.CorsMiddleware(http.HandlerFunc(ordersDBConn.addOrderHandler)))
 	mux.Handle("PATCH /orders/{id}",
 		shared.CorsMiddleware(http.HandlerFunc(ordersDBConn.updateOrderHandler)))
+
+	mux.Handle("GET /zipcodes/{code}",
+		shared.CorsMiddleware(http.HandlerFunc(zipcodesDBConn.getZipByIdHandler)))
 }
