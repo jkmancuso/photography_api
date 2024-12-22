@@ -73,7 +73,7 @@ type DBPictureItem struct {
 }
 
 type DBZipItem struct {
-	Code  int    `dynamodbav:"code" json:"code"`
+	Code  string `dynamodbav:"code" json:"code"`
 	City  string `dynamodbav:"city" json:"city"`
 	State string `dynamodbav:"state" json:"state"`
 }
