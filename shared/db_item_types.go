@@ -29,28 +29,32 @@ type DBJobItem struct {
 }
 
 type DBOrderItem struct {
-	Id                   string                 `dynamodbav:"id" json:"id,omitempty"`
-	JobId                string                 `dynamodbav:"job_id" json:"job_id,omitempty"`
-	RecordNum            int                    `dynamodbav:"record_num" json:"record_num,omitempty"`
-	Fname                string                 `dynamodbav:"fname" json:"fname,omitempty"`
-	Lname                string                 `dynamodbav:"lname" json:"lname,omitempty"`
-	Address              string                 `dynamodbav:"address" json:"address,omitempty"`
-	City                 string                 `dynamodbav:"city" json:"city,omitempty"`
-	State                string                 `dynamodbav:"state" json:"state,omitempty"`
-	Zip                  string                 `dynamodbav:"zip" json:"zip,omitempty"`
-	Phone                string                 `dynamodbav:"phone" json:"phone,omitempty"`
-	GroupQuantity        int                    `dynamodbav:"group_quantity" json:"group_quantity,omitempty"`
-	Group                string                 `dynamodbav:"group" json:"group,omitempty"`
-	GroupPictureNum      string                 `dynamodbav:"group_picture_num" json:"group_picture_num,omitempty"`
-	Instrument           string                 `dynamodbav:"instrument" json:"instrument,omitempty"`
-	InstrumentQuantity   int                    `dynamodbav:"instrument_quantity" json:"instrument_quantity,omitempty"`
-	InstrumentPosition   int                    `dynamodbav:"instrument_position" json:"instrument_position,omitempty"`
-	InstrumentPictureNum string                 `dynamodbav:"instrument_picture_num" json:"instrument_picture_num,omitempty"`
-	CheckNum             int                    `dynamodbav:"check_num" json:"check_num,omitempty"`
-	Amount               int                    `dynamodbav:"amount" json:"amount,omitempty"`
-	Section              map[string]interface{} `dynamodbav:"section" json:"section,omitempty"`
-	CreatedAt            time.Time              `dynamodbav:"created_at,omitempty"`
-	ExpireAt             int64                  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
+	Id              string            `dynamodbav:"id" json:"id,omitempty"`
+	JobId           string            `dynamodbav:"job_id" json:"job_id,omitempty"`
+	RecordNum       int               `dynamodbav:"record_num" json:"record_num,omitempty"`
+	Fname           string            `dynamodbav:"fname" json:"fname,omitempty"`
+	Lname           string            `dynamodbav:"lname" json:"lname,omitempty"`
+	Address         string            `dynamodbav:"address" json:"address,omitempty"`
+	City            string            `dynamodbav:"city" json:"city,omitempty"`
+	State           string            `dynamodbav:"state" json:"state,omitempty"`
+	Zip             string            `dynamodbav:"zip" json:"zip,omitempty"`
+	Phone           string            `dynamodbav:"phone" json:"phone,omitempty"`
+	GroupQuantity   int               `dynamodbav:"group_quantity" json:"group_quantity,omitempty"`
+	Group           string            `dynamodbav:"group" json:"group,omitempty"`
+	GroupPictureNum string            `dynamodbav:"group_picture_num" json:"group_picture_num,omitempty"`
+	CheckNum        int               `dynamodbav:"check_num" json:"check_num,omitempty"`
+	Amount          int               `dynamodbav:"amount" json:"amount,omitempty"`
+	Section         InstrumentSection `dynamodbav:"section" json:"section,omitempty"`
+	CreatedAt       time.Time         `dynamodbav:"created_at,omitempty"`
+	ExpireAt        int64             `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
+}
+
+type InstrumentSection struct {
+	Instrument string `dynamodbav:"instrument" json:"instrument,omitempty"`
+	Name       string `dynamodbav:"name" json:"name,omitempty"`
+	Position   string `dynamodbav:"position" json:"position,omitempty"`
+	PictureNum string `dynamodbav:"picture_num" json:"picture_num,omitempty"`
+	Quantity   int    `dynamodbav:"quantity" json:"quantity,omitempty"`
 }
 
 type DBGroupItem struct {
