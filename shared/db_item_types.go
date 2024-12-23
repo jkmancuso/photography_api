@@ -15,11 +15,10 @@ type DBLoginItem struct {
 }
 
 type DBJobItem struct {
-	Id        string   `dynamodbav:"id" json:"id,omitempty"`
-	JobName   string   `dynamodbav:"job_name" json:"job_name"`
-	JobYear   int      `dynamodbav:"job_year" json:"job_year"`
-	JobGroups []string `dynamodbav:"job_groups" json:"job_groups,omitempty"`
-	ExpireAt  int64    `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
+	Id       string `dynamodbav:"id" json:"id,omitempty"`
+	JobName  string `dynamodbav:"job_name" json:"job_name"`
+	JobYear  int    `dynamodbav:"job_year" json:"job_year"`
+	ExpireAt int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
 	/*
 		DynamoDB expire TTL
 		Using this for purging integration tests automatically
