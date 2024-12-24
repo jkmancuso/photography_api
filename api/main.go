@@ -20,7 +20,7 @@ be available on lambda warm start saving on startup resource*/
 
 var (
 	httpLambda *httpadapter.HandlerAdapter
-	tables     = []string{"jobs", "groups", "pictures", "instruments", "orders", "zipcodes"}
+	tables     = []string{"jobs", "groups", "instruments", "orders", "zipcodes"}
 	tableMap   = map[string]*shared.DBInfo{}
 
 	awsCfg aws.Config

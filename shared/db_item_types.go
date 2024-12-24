@@ -70,13 +70,6 @@ type DBInstrumentItem struct {
 	ExpireAt       int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
 }
 
-type DBPictureItem struct {
-	Id         string `dynamodbav:"id" json:"id,omitempty"`
-	PictureNum string `dynamodbav:"picture_num" json:"picture_num,omitempty"`
-	Section    string `dynamodbav:"section" json:"section,omitempty"`
-	ExpireAt   int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
-}
-
 type DBZipItem struct {
 	Code  string `dynamodbav:"code" json:"code"`
 	City  string `dynamodbav:"city" json:"city"`

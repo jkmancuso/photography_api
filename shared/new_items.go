@@ -24,12 +24,6 @@ func NewInstrumentItem() *DBInstrumentItem {
 	}
 }
 
-func NewPictureItem() *DBPictureItem {
-	return &DBPictureItem{
-		Id: GenerateUUID(),
-	}
-}
-
 func NewGroupItem() *DBGroupItem {
 	return &DBGroupItem{
 		Id: GenerateUUID(),
@@ -73,18 +67,6 @@ func NewQAGroupItem() []byte {
 	return result
 }
 
-func NewQAPictureItem() []byte {
-	pictureItem := NewPictureItem()
-
-	pictureItem.PictureNum = "Integration Test"
-	pictureItem.Section = "Integration Test Section"
-	pictureItem.ExpireAt = ExpireIn + time.Now().Unix()
-
-	result, _ := json.Marshal(pictureItem)
-
-	return result
-}
-
 func NewQAInstrumentItem() []byte {
 	instrumentItem := NewInstrumentItem()
 
@@ -107,8 +89,6 @@ func NewDBItem(table string) []byte {
 		b = NewQAOrderItem()
 	case "groups":
 		b = NewQAGroupItem()
-	case "pictures":
-		b = NewQAPictureItem()
 	case "instruments":
 		b = NewQAInstrumentItem()
 

@@ -14,7 +14,6 @@ func SetupRoutes(tableMap map[string]*shared.DBInfo, mux *http.ServeMux) {
 	*/
 	jobsDBConn := handlerDBConn{dbInfo: tableMap["jobs"]}
 	instrumentsDBConn := handlerDBConn{dbInfo: tableMap["instruments"]}
-	picturesDBConn := handlerDBConn{dbInfo: tableMap["pictures"]}
 	groupsDBConn := handlerDBConn{dbInfo: tableMap["groups"]}
 	ordersDBConn := handlerDBConn{dbInfo: tableMap["orders"]}
 	zipcodesDBConn := handlerDBConn{dbInfo: tableMap["zipcodes"]}
@@ -38,16 +37,6 @@ func SetupRoutes(tableMap map[string]*shared.DBInfo, mux *http.ServeMux) {
 		shared.CorsMiddleware(http.HandlerFunc(instrumentsDBConn.deleteInstrumentHandler)))
 	mux.Handle("POST /instruments",
 		shared.CorsMiddleware(http.HandlerFunc(instrumentsDBConn.addInstrumentHandler)))
-
-	/*PICTURES*/
-	mux.Handle("GET /pictures",
-		shared.CorsMiddleware(http.HandlerFunc(picturesDBConn.getPicturesHandler)))
-	mux.Handle("GET /pictures/{id}",
-		shared.CorsMiddleware(http.HandlerFunc(picturesDBConn.getPictureByIdHandler)))
-	mux.Handle("DELETE /pictures/{id}",
-		shared.CorsMiddleware(http.HandlerFunc(picturesDBConn.deletePictureHandler)))
-	mux.Handle("POST /pictures",
-		shared.CorsMiddleware(http.HandlerFunc(picturesDBConn.addPictureHandler)))
 
 	/*GROUPS*/
 	mux.Handle("GET /groups",
