@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
@@ -9,14 +10,15 @@ import (
 	"github.com/jkmancuso/photography_api/shared"
 )
 
-func returnTokenForValidAuth(ctx context.Context, email string, hashedPassword string, db *shared.DBInfo) (string, error) {
+func returnSessionForValidAuth(ctx context.Context, email string, hashedPassword string, db *shared.DBInfo) (*shared.Session, error) {
 	adminItem := &shared.DBAdminItem{}
-	token := ""
+
+	sess := &shared.Session{}
 
 	emailAttribute, err := attributevalue.Marshal(email)
 
 	if err != nil {
-		return token, err
+		return sess, err
 	}
 
 	pKey := map[string]types.AttributeValue{
@@ -25,18 +27,21 @@ func returnTokenForValidAuth(ctx context.Context, email string, hashedPassword s
 	resp, err := db.GetItem(ctx, pKey)
 
 	if err != nil {
-		return token, err
+		return sess, err
 	}
 
 	if err = attributevalue.UnmarshalMap(resp.Item, adminItem); err != nil {
-		return token, err
+		return sess, err
 	}
 
 	if adminItem.Hashpass != hashedPassword {
-		return token, nil
+		return sess, nil
 	}
 
-	return adminItem.Token, nil
+	sess.ExpireAt = time.Now().Add(720 * time.Hour)
+	sess.SessionId = adminItem.Token
+
+	return sess, nil
 }
 
 func addLogin(ctx context.Context, db *shared.DBInfo, login *shared.DBLoginItem) error {

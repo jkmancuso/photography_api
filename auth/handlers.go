@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -76,7 +75,7 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := returnTokenForValidAuth(context.Background(),
+	sess, err := returnSessionForValidAuth(context.Background(),
 		auth.Email,
 		hashpass,
 		h.DBMap["admins"])
@@ -87,16 +86,14 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(token) == 0 {
+	if len(sess.SessionId) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.INVALID_USER_PASS)
 		return
 	}
 
-	w.Header().Add("Set-Cookie", fmt.Sprintf("token=%s; max-age=%d", token, 43200))
-
 	//update login success to true
-	count, err := updateLogin(ctx, h.DBMap["logins"], loginItem)
+	_, err = updateLogin(ctx, h.DBMap["logins"], loginItem)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -104,12 +101,14 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	returnMsg := shared.OK
+	sessBytes, err := json.Marshal(sess)
 
-	if count == 0 {
-		returnMsg = shared.RECORD_NOT_FOUND
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
 	}
 
-	json.NewEncoder(w).Encode(returnMsg)
+	json.NewEncoder(w).Encode(string(sessBytes))
 
 }

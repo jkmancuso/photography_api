@@ -1,5 +1,7 @@
 package shared
 
+import "time"
+
 type GenericMsg struct {
 	Message string `json:"message"`
 }
@@ -7,6 +9,11 @@ type GenericMsg struct {
 type Auth struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type Session struct {
+	SessionId string
+	ExpireAt  time.Time
 }
 
 type GenericTest struct {
