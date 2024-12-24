@@ -2,3 +2,5 @@ api/bootstrap
 api/myFunction.zip
 auth/bootstrap
 auth/myFunction.zip
+lambda_authorizer/bootstrap
+lambda_authorizer/myFunction.zip
