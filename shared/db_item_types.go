@@ -63,6 +63,12 @@ type DBGroupItem struct {
 	ExpireAt  int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
 }
 
+type DBSessionItem struct {
+	Id       string `dynamodbav:"id" json:"id,omitempty"`
+	Email    string `dynamodbav:"email" json:"group_name,omitempty"`
+	ExpireAt int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
+}
+
 type DBInstrumentItem struct {
 	Id             string `dynamodbav:"id" json:"id,omitempty"`
 	InstrumentName string `dynamodbav:"instrument_name" json:"instrument_name,omitempty"`

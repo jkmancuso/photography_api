@@ -86,13 +86,16 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(sess.SessionId) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.INVALID_USER_PASS)
+	// new session to the DB
+	err = addSession(ctx, h.DBMap["sessions"], sess)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
 		return
 	}
 
-	//update login success to true
+	//update audit login success to true
 	_, err = updateLogin(ctx, h.DBMap["logins"], loginItem)
 
 	if err != nil {
@@ -101,6 +104,7 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// prepare to send session json response back to client
 	sessBytes, err := json.Marshal(sess)
 
 	if err != nil {

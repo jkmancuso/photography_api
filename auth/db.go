@@ -10,10 +10,10 @@ import (
 	"github.com/jkmancuso/photography_api/shared"
 )
 
-func returnSessionForValidAuth(ctx context.Context, email string, hashedPassword string, db *shared.DBInfo) (*shared.Session, error) {
+func returnSessionForValidAuth(ctx context.Context, email string, hashedPassword string, db *shared.DBInfo) (*shared.DBSessionItem, error) {
 	adminItem := &shared.DBAdminItem{}
 
-	sess := &shared.Session{}
+	sess := shared.NewSessionItem()
 
 	emailAttribute, err := attributevalue.Marshal(email)
 
@@ -38,13 +38,25 @@ func returnSessionForValidAuth(ctx context.Context, email string, hashedPassword
 		return sess, nil
 	}
 
-	sess.ExpireAt = time.Now().Add(720 * time.Hour)
-	sess.SessionId = adminItem.Token
+	sess.Email = email
+	sess.ExpireAt = time.Now().Add(720 * time.Hour).Unix()
 
 	return sess, nil
 }
 
 func addLogin(ctx context.Context, db *shared.DBInfo, login *shared.DBLoginItem) error {
+
+	item, err := attributevalue.MarshalMap(login)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.AddItem(ctx, item)
+	return err
+}
+
+func addSession(ctx context.Context, db *shared.DBInfo, login *shared.DBSessionItem) error {
 
 	item, err := attributevalue.MarshalMap(login)
 

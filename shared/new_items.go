@@ -29,6 +29,11 @@ func NewGroupItem() *DBGroupItem {
 		Id: GenerateUUID(),
 	}
 }
+func NewSessionItem() *DBSessionItem {
+	return &DBSessionItem{
+		Id: GenerateUUID(),
+	}
+}
 
 func NewQAJobItem() []byte {
 	jobItem := NewJobItem()
