@@ -1,31 +1,46 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func handler(request events.APIGatewayCustomAuthorizerRequest) (events.APIGatewayCustomAuthorizerResponse, error) {
+func handler(req events.APIGatewayProxyRequest) (events.APIGatewayCustomAuthorizerResponse, error) {
+
+	log.Printf("Request: %+v", req)
+	log.Printf("RequestContext: %+v", req.RequestContext)
 
 	//to fix
 	principalID := "testuser"
-	awsAccountID := "084375571753"
-	APIID := "ygaqa1m2xf"
-	stage := "v1"
-	region := "us-east-2"
+	effect := "Deny"
 
-	resource := fmt.Sprintf("arn:aws:execute-api:{%s}:{%s}:{%s}/{%s}/*]",
-		region,
-		awsAccountID,
-		APIID,
-		stage)
+	resource := fmt.Sprintf("arn:aws:execute-api:%s:%s:%s/%s/*",
+		strings.Split(req.RequestContext.DomainName, ".")[2],
+		req.RequestContext.AccountID,
+		req.RequestContext.APIID,
+		req.RequestContext.Stage)
 
-	fmt.Printf("Resource Arn: %s", resource)
+	inDB, err := sessionExistsInDB(context.Background(), req.Headers["x-session-id"])
 
-	resp := NewAuthorizerResponse(principalID, resource)
+	if err != nil {
+		log.Printf("Error querying session DB: %v", err)
+	}
 
+	if inDB {
+		effect = "Allow"
+	}
+
+	resp := NewAuthorizerResponse(principalID, resource, effect)
+
+	b, _ := json.Marshal(resp)
+
+	log.Printf("Retuning document: %+v", string(b))
 	return resp, nil
 }
 
@@ -35,14 +50,14 @@ func main() {
 
 }
 
-func NewAuthorizerResponse(principalID string, resource string) events.APIGatewayCustomAuthorizerResponse {
+func NewAuthorizerResponse(principalID string, resource string, effect string) events.APIGatewayCustomAuthorizerResponse {
 
 	policyDoc := events.APIGatewayCustomAuthorizerPolicy{
 		Version: "2012-10-17",
 		Statement: []events.IAMPolicyStatement{
 			{
 				Action:   []string{"execute-api:Invoke"},
-				Effect:   "Allow",
+				Effect:   effect,
 				Resource: []string{resource},
 			},
 		},
