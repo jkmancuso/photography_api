@@ -31,7 +31,7 @@ func NewDB(table string, cfg aws.Config) (*DBInfo, error) {
 
 func (db DBInfo) DoFullScan(ctx context.Context, limit int32, lek map[string]types.AttributeValue) (*dynamodb.ScanOutput, error) {
 
-	log.Debugf("Full scan for %s", db.Tablename)
+	log.Debugf("FullScan for Table: %s", db.Tablename)
 	log.Debugf("Start Key: %+v", lek)
 
 	resp, err := db.Client.Scan(ctx, &dynamodb.ScanInput{
@@ -51,7 +51,7 @@ func (db DBInfo) DoFullScan(ctx context.Context, limit int32, lek map[string]typ
 
 func (db DBInfo) AddItem(ctx context.Context, item map[string]types.AttributeValue) error {
 
-	log.Debugf("PutItem for table: %s", db.Tablename)
+	log.Debugf("AddItem for Table: %s", db.Tablename)
 	log.Debugf("Item is: %+v", item)
 
 	_, err := db.Client.PutItem(ctx, &dynamodb.PutItemInput{
@@ -68,7 +68,7 @@ func (db DBInfo) AddItem(ctx context.Context, item map[string]types.AttributeVal
 
 func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeValue) (*dynamodb.GetItemOutput, error) {
 
-	log.Debugf("PutItem for table: %s", db.Tablename)
+	log.Debugf("GetItem for Table: %s", db.Tablename)
 	log.Debugf("Key is: %+v", pKey)
 
 	input := &dynamodb.GetItemInput{
@@ -88,7 +88,7 @@ func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeVal
 
 func (db DBInfo) QueryItem(ctx context.Context, keys map[string]expression.ValueBuilder, gsi string) (*dynamodb.QueryOutput, error) {
 
-	log.Debugf("QueryItem for table: %s", db.Tablename)
+	log.Debugf("QueryItem for Table: %s", db.Tablename)
 	log.Debugf("Key is: %+v", keys)
 
 	if len(keys) != 1 && len(keys) != 2 {
@@ -136,7 +136,7 @@ func (db DBInfo) QueryItem(ctx context.Context, keys map[string]expression.Value
 
 func (db DBInfo) DeleteItem(ctx context.Context, pKey map[string]types.AttributeValue) (int, error) {
 
-	log.Debugf("DeleteItem for table: %s", db.Tablename)
+	log.Debugf("DeleteItem for Table: %s", db.Tablename)
 	log.Debugf("Key is: %+v", pKey)
 
 	resp, err := db.Client.DeleteItem(ctx, &dynamodb.DeleteItemInput{
