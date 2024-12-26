@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -35,7 +36,7 @@ func returnSessionForValidAuth(ctx context.Context, email string, hashedPassword
 	}
 
 	if adminItem.Hashpass != hashedPassword {
-		return sess, nil
+		return sess, errors.New("password is incorrect")
 	}
 
 	sess.Email = email
