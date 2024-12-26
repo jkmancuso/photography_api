@@ -5,7 +5,6 @@ import "time"
 type DBAdminItem struct {
 	Email    string `dynamodbav:"email" json:"email"`
 	Hashpass string `dynamodbav:"hashpass" json:"hashpass"`
-	Token    string `dynamodbav:"token" json:"Token"`
 }
 
 type DBLoginItem struct {
@@ -65,7 +64,7 @@ type DBGroupItem struct {
 
 type DBSessionItem struct {
 	Id       string `dynamodbav:"id" json:"id,omitempty"`
-	Email    string `dynamodbav:"email" json:"group_name,omitempty"`
+	Email    string `dynamodbav:"email" json:"email,omitempty"`
 	ExpireAt int64  `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
 }
 

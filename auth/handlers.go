@@ -104,15 +104,6 @@ func (h handlerMetadata) postAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// prepare to send session json response back to client
-	sessBytes, err := json.Marshal(sess)
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
-		return
-	}
-
-	json.NewEncoder(w).Encode(string(sessBytes))
+	json.NewEncoder(w).Encode(sess)
 
 }
