@@ -2,11 +2,49 @@ package database
 
 import (
 	"context"
+	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/jkmancuso/photography_api/shared"
 )
+
+func UpdateInstrument(ctx context.Context, db *shared.DBInfo, instrument map[string]interface{}) (int, error) {
+
+	idAttr, err := attributevalue.Marshal(instrument["id"])
+
+	if err != nil {
+		return 0, err
+	}
+
+	pKey := map[string]types.AttributeValue{"id": idAttr}
+
+	delete(instrument, "id") //so you dont loop over it below
+
+	var update expression.UpdateBuilder
+
+	for k, v := range instrument {
+		update = update.Set(expression.Name(k), expression.Value(v))
+		fmt.Printf("KEY: %v  VAL: %v", k, v)
+	}
+
+	expr, err := expression.NewBuilder().WithUpdate(update).Build()
+
+	if err != nil {
+		log.Printf("Couldn't build expression for update. Here's why: %v\n", err)
+		return 0, err
+	}
+
+	count, err := db.UpdateItem(ctx, pKey, expr)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
 
 func AddInstrument(ctx context.Context, db *shared.DBInfo, instrument *shared.DBInstrumentItem) error {
 

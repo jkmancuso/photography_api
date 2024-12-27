@@ -12,6 +12,63 @@ import (
 	"github.com/jkmancuso/photography_api/shared"
 )
 
+func (h handlerDBConn) updateInstrumentHandler(w http.ResponseWriter, r *http.Request) {
+
+	// 1. check valid id in /orders{id} path
+	id := r.PathValue("id")
+
+	if len(id) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
+		return
+	}
+
+	if !shared.IsUUID(id) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
+		return
+	}
+
+	// 2. check valid body which should be the params to change
+	bytesBody, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if len(bytesBody) == 0 || err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.INVALID_BODY)
+		return
+	}
+
+	// 3. orderItem has the params to change
+	instrumentItem := make(map[string]interface{})
+
+	if err := json.Unmarshal(bytesBody, &instrumentItem); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
+	}
+
+	instrumentItem["id"] = id
+
+	// 4. update DB
+	count, err := database.UpdateOrder(context.Background(), h.dbInfo, instrumentItem)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(shared.GenericMsg{Message: err.Error()})
+		return
+	}
+
+	if count == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
+		return
+	}
+
+	json.NewEncoder(w).Encode(shared.GenericMsg{Message: "OK"})
+
+}
+
 func (h handlerDBConn) getInstrumentsHandler(w http.ResponseWriter, r *http.Request) {
 
 	items, count, err := database.GetInstruments(context.Background(), h.dbInfo)
