@@ -29,6 +29,7 @@ type DBJobItem struct {
 
 type DBOrderItem struct {
 	Id              string            `dynamodbav:"id" json:"id,omitempty"`
+	JobName         string            `dynamodbav:"job_name" json:"job_name,omitempty"`
 	JobId           string            `dynamodbav:"job_id" json:"job_id,omitempty"`
 	RecordNum       int               `dynamodbav:"record_num" json:"record_num,omitempty"`
 	Fname           string            `dynamodbav:"fname" json:"fname,omitempty"`
