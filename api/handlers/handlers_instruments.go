@@ -14,7 +14,7 @@ import (
 
 func (h handlerDBConn) updateInstrumentHandler(w http.ResponseWriter, r *http.Request) {
 
-	// 1. check valid id in /orders{id} path
+	// 1. check valid id in /instruments/{id} path
 	id := r.PathValue("id")
 
 	if len(id) == 0 {
@@ -39,7 +39,7 @@ func (h handlerDBConn) updateInstrumentHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	// 3. orderItem has the params to change
+	// 3. instrumentItem has the params to change
 	instrumentItem := make(map[string]interface{})
 
 	if err := json.Unmarshal(bytesBody, &instrumentItem); err != nil {

@@ -73,7 +73,7 @@ func (h handlerDBConn) deleteOrderHandler(w http.ResponseWriter, r *http.Request
 
 func (h handlerDBConn) updateOrderHandler(w http.ResponseWriter, r *http.Request) {
 
-	// 1. check valid id in /orders{id} path
+	// 1. check valid id in /orders/{id} path
 	id := r.PathValue("id")
 
 	if len(id) == 0 {

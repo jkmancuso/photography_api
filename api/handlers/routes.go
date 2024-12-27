@@ -49,6 +49,8 @@ func SetupRoutes(tableMap map[string]*shared.DBInfo, mux *http.ServeMux) {
 		shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.deleteGroupHandler)))
 	mux.Handle("POST /groups",
 		shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.addGroupHandler)))
+	mux.Handle("PATCH /groups",
+		shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.updateGroupHandler)))
 
 	/*ORDERS*/
 	mux.Handle("GET /jobs/{job_id}/orders/{record_num}",
