@@ -17,7 +17,7 @@ import (
 
 func (h handlerDBConn) getJobsHandler(w http.ResponseWriter, r *http.Request) {
 
-	items, count, err := database.GetJobs(context.Background(), h.dbInfo)
+	items, _, err := database.GetJobs(context.Background(), h.dbInfo)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -25,11 +25,11 @@ func (h handlerDBConn) getJobsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if count == 0 {
+	/*if count == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.RECORD_NOT_FOUND)
 		return
-	}
+	}*/
 
 	json.NewEncoder(w).Encode(items)
 
