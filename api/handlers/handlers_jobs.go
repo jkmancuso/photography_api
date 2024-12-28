@@ -52,7 +52,7 @@ func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	orderURL := fmt.Sprintf("/jobs/%s/orders", id)
-	orderItem, err := checkOrderHandler(orderURL)
+	orderItems, err := checkOrderHandler(orderURL)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -60,7 +60,7 @@ func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if len(orderItem.Id) != 0 {
+	if len(orderItems) != 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(shared.RECORD_IN_USE)
 		return
@@ -160,32 +160,36 @@ func (h handlerDBConn) addJobHandler(w http.ResponseWriter, r *http.Request) {
 
 // check if an order exists using this job in case you
 // attempt to delete the job
-func checkOrderHandler(url string) (*shared.DBOrderItem, error) {
+func checkOrderHandler(url string) ([]shared.DBOrderItem, error) {
 	log.Debugf("checkOrderHandler: GET %s", url)
 
-	orderItem := &shared.DBOrderItem{}
+	orderItems := []shared.DBOrderItem{}
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
 		log.Printf("ERROR: %v", err)
-		return orderItem, err
+		return orderItems, err
 	}
 
 	respRecorder := httptest.NewRecorder()
 	http.DefaultServeMux.ServeHTTP(respRecorder, req)
 
 	resultBytes, err := io.ReadAll(respRecorder.Result().Body)
-	log.Debugf("Response: %s", respRecorder.Body.String())
+
+	log.Debugf("Response of length %d: %s",
+		len(respRecorder.Body.String()),
+		respRecorder.Body.String())
 
 	if err != nil {
 		log.Println(err)
-		return orderItem, err
+		return orderItems, err
 	}
 
-	if err = json.Unmarshal(resultBytes, orderItem); err != nil {
+	//if you got here, it means there are some orders for this job
+	if err = json.Unmarshal(resultBytes, &orderItems); err != nil {
 		log.Println(err)
-		return orderItem, err
+		return orderItems, err
 	}
 
-	return orderItem, nil
+	return orderItems, nil
 }
