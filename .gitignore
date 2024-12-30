@@ -4,3 +4,5 @@ auth/bootstrap
 auth/myFunction.zip
 lambda_authorizer/bootstrap
 lambda_authorizer/myFunction.zip
+data_import/.env
+.venv
