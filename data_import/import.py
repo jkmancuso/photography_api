@@ -42,7 +42,7 @@ class DB:
     def close(self):
         self.conn.close()
     
-    def GetJobs(self) -> dict:
+    def get_jobs(self) -> dict:
         jobs_dict={}
         query="select * from jobs"
         self.cursor.execute(query)
@@ -54,7 +54,7 @@ class DB:
         
         return jobs_dict
     
-    def GetInstruments(self) -> dict:
+    def get_instruments(self) -> dict:
         instruments_dict={}
         query="select * from instruments"
         self.cursor.execute(query)
@@ -64,7 +64,7 @@ class DB:
         
         return instruments_dict
     
-    def GetGroups(self) -> dict:
+    def get_groups(self) -> dict:
         groups_dict={}
         query="select * from groups"
         self.cursor.execute(query)
@@ -75,11 +75,12 @@ class DB:
         return groups_dict
     
     
-    def GetOrders(self, jobs_dict: dict[int], 
+    def get_orders(self, jobs_dict: dict[int], 
                   instruments_dict: dict[int], 
                   groups_dict: dict[int]) -> dict:
         orders_dict={}
         query="select * from customers where doe>= %s"
+        #to do - change to customer id > ......
         self.cursor.execute(query, datetime.date(2024,1,1))
 
         for row in self.cursor:
@@ -97,7 +98,24 @@ class DB:
                     row['checknum'],row['amount'],section)
         
         return orders_dict
+    
+    #Goal: Determine the orders delta (a list of cuztomer ids) we need to sync 
+    # from old MySQL customers DB -> new Dynamo orders DB
+    
+    #Step 1: get the most recent update on the old customer DB, check the auto increment id
+    #Step 2: lets make this a binary search problem! Rather than download the entire dynamo order records,
+    # in MySQL we have the highest customer id and we have the lowest possible customer id (in Jan 01 2024).
+    # Thats our range. Get the lowest_customer_id, then check it. If !customer_id_exists then repeat for
+    # highest_customer_id. If !customer_id_exists then find the half way point in the range, repeat until
+    # you find the inflection point.
+    def get_highest_customer_id(self) ->int:
+        pass
 
+    def get_lowest_customer_id(self) ->int:
+        pass
+    
+    def customer_id_exists(self) ->bool:
+        pass
 
 class Job():
     def __init__(self,job_name: str,job_year: str,uuid: str):
