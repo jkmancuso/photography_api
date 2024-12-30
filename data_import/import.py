@@ -93,7 +93,7 @@ class DB:
                     jobs_dict[row['job_id']]['job_name'],row['record_num'],
                     row['fname'],row['lname'],row['address'],row['city'],
                     row['state'],row['zip'],row['phone'],row['group_quantity'],
-                    groups_dict[row['group_id']],row['group_picturenum'], 
+                    groups_dict[row['group_id']]['groupname'],row['group_picturenum'], 
                     row['checknum'],row['amount'],section)
         
         return orders_dict
