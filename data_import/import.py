@@ -1,7 +1,7 @@
 import logging
 import os
 import datetime
-
+import math
 import uuid
 import mysql.connector
 from dotenv import load_dotenv
@@ -75,12 +75,11 @@ class DB:
         return groups_dict
     
     
-    def get_orders(self, jobs_dict: dict[int], 
-                  instruments_dict: dict[int], 
-                  groups_dict: dict[int]) -> dict:
+    def get_customer_orders(self, jobs_dict: dict[int],
+                            instruments_dict: dict[int], 
+                            groups_dict: dict[int]) -> dict:
         orders_dict={}
         query="select * from customers where doe>= %s"
-        #to do - change to customer id > ......
         self.cursor.execute(query, datetime.date(2024,1,1))
 
         for row in self.cursor:
@@ -99,22 +98,40 @@ class DB:
         
         return orders_dict
     
-    #Goal: Determine the orders delta (a list of cuztomer ids) we need to sync 
+    #Goal: Determine the orders delta (a list of customer ids) we need to sync 
     # from old MySQL customers DB -> new Dynamo orders DB
+     
     
     #Step 1: get the most recent update on the old customer DB, check the auto increment id
-    #Step 2: lets make this a binary search problem! Rather than download the entire dynamo order records,
-    # in MySQL we have the highest customer id and we have the lowest possible customer id (in Jan 01 2024).
-    # Thats our range. Get the lowest_customer_id, then check it. If !customer_id_exists then repeat for
-    # highest_customer_id. If !customer_id_exists then find the half way point in the range, repeat until
-    # you find the inflection point.
     def get_highest_customer_id(self) ->int:
         pass
 
+    #Step 2: get the first entry on the old customer DB, (in Jan 01 2024)
     def get_lowest_customer_id(self) ->int:
         pass
-    
-    def customer_id_exists(self) ->bool:
+
+    #Step 3: lets make this a binary search problem! Rather than download the entire dynamo 
+    # order records, in MySQL we have the highest customer id and we have the lowest possible 
+    # customer id (in Jan 01 2024). Thats our range. 
+    # Goal: return the highest customer id we have associated with a dynamodb order
+    def get_highest_customer_order_in_dynamo(self, low: int, high: int) -> int:
+        
+        #in this case, dynamo is empty. Send everything (ie start from lower bound)
+        if not self.customer_id_exists_in_dynamo(low):
+            return low
+        
+        #base case
+        if low >= high or low == high-1:
+            return min(low,high)
+
+        mid=math.floor((high-low)/2)+low
+        
+        if self.customer_id_exists_in_dynamo(mid+1):
+            return self.get_highest_customer_order_in_dynamo(mid+1,high)
+        else:
+            return self.get_highest_customer_order_in_dynamo(low,mid)
+        
+    def customer_id_exists_in_dynamo(self) ->bool:
         pass
 
 class Job():
