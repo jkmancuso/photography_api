@@ -23,8 +23,9 @@ class Differ:
 
     @staticmethod
     def get_JobOrders_not_in_Dynamo(orders_already_in_api: list[Order],orders_in_DB: list[Order]) -> list[Order]:
-        rec_nums=[]
+        
         max_rec_num_in_dynamo=0
+        rec_nums=[0]
         diff=[]
 
         for order in orders_already_in_api:
@@ -34,6 +35,9 @@ class Differ:
 
         for order in orders_in_DB:
             if order.record_num> max_rec_num_in_dynamo:
+                logging.info(f"DB Order: {order.record_num} MISSING")
                 diff.append(order)
+            else:
+                logging.info(f"DB Order: {order.record_num} FOUND")
 
         return diff

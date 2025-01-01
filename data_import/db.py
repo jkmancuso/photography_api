@@ -63,6 +63,6 @@ class DB:
     def get_customer_orders_by_job_id(self, id) -> list[dict]:
         
         query=f"select * from customers where job_id = %s"
-        self.cursor.execute(query, id)
+        self.cursor.execute(query, (id,))
         
         return self.cursor.fetchall()

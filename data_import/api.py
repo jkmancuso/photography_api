@@ -1,6 +1,8 @@
 import requests
 import logging
 from job import Job
+from order import Order
+
 class API:
 
     logging.basicConfig(level=logging.INFO)
@@ -12,6 +14,7 @@ class API:
             "x-session-id": self.x_session_id,
             "Content-Type":"application/json"
         }
+        self.jobs_lookup={}
     
     def get_jobs(self)->list[dict]:
         url=f"{self.url}/jobs"
@@ -19,15 +22,19 @@ class API:
 
         r = requests.get(url,headers=self.headers)
 
+        json=r.json()
+        
         if r.status_code!=200:
-            logging.error(r.json())
+            logging.error(json)
             exit(1)
         
-        return r.json()
+        for job in json:
+            self.jobs_lookup[job['job_name']]=job['id']
+        
+        return json
 
     def get_orders_for_job(self,job_name)->list[dict]:
-        orders_dict={}
-        url=f"{self.url}/jobs/{self.jobs[job_name]}/orders"
+        url=f"{self.url}/jobs/{self.jobs_lookup[job_name]}/orders"
 
         logging.info(f"HTTP GET {url} with headers {self.headers}")
         r = requests.get(url,headers=self.headers)
@@ -35,6 +42,8 @@ class API:
         if r.status_code!=200:
             logging.error(r.json())
             exit(1)
+        
+        logging.info(r.json())
         
         return r.json()
     
@@ -51,10 +60,8 @@ class API:
             logging.info(f"HTTP POST {url}")
             logging.info(f"with headers {self.headers}")
             logging.info(f"with payload {job_data}")
-             
-
-            r = requests.post(url,json=job_data,headers=self.headers)
             
+            r = requests.post(url,json=job_data,headers=self.headers)        
 
             if r.status_code!=200:
                 logging.error(f"Request:{r.request.body}")
@@ -62,4 +69,42 @@ class API:
                 exit(1)
             
             logging.info("SUCCESS")
+    
+    def post_orders(self,orders: list[Order]):
+        url=f"{self.url}/orders"
+
+        for order in orders:
+            
+            order_data={
+                "job_name": order.job_name,
+                "job_id": order.job_id,
+                "record_num": order.record_num,
+                "fname": order.fname,
+                "lname": order.lname,
+                "address":order.address,
+                "city":order.city,
+                "state":order.state,
+                "zip":order.zip,
+                "phone":order.phone,
+                "group_quantity":order.group_quantity,
+                "group":order.group,
+                "group_picture_num":order.group_picture_num,
+                "check_num":order.check_num,
+                "amount":order.amount,
+                "section":order.section
+            }
+
+            logging.info(f"HTTP POST {url}")
+            logging.info(f"with headers {self.headers}")
+            logging.info(f"with payload {order_data}")
+            
+            r = requests.post(url,json=order_data,headers=self.headers)        
+
+            if r.status_code!=200:
+                logging.error(f"Request:{r.request.body}")
+                logging.error(f"{r.status_code}: {r.json()}")
+                exit(1)
+            
+            logging.info("SUCCESS")
+
         

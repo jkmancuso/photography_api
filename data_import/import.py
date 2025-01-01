@@ -44,5 +44,11 @@ if __name__ == '__main__':
     #########################
 
     ##NOW ORDERS#############
+    for job in jobs_in_DB:
+        
+        orders_in_db=[convert.convert_DBorder_to_Order(order) for order in db.get_customer_orders_by_job_id(job.job_id)]
+        orders_already_in_api=[convert.convert_apiorder_to_Order(order) for order in api.get_orders_for_job(job.job_name)]      
+        missing_orders=Differ.get_JobOrders_not_in_Dynamo(orders_already_in_api,orders_in_db)
+        exit(0)
 
     db.close()
