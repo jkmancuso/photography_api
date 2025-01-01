@@ -43,8 +43,6 @@ class API:
             logging.error(r.json())
             exit(1)
         
-        logging.info(r.json())
-        
         return r.json()
     
     def post_jobs(self,jobs: list[Job]):
@@ -77,7 +75,7 @@ class API:
             
             order_data={
                 "job_name": order.job_name,
-                "job_id": order.job_id,
+                "job_id": self.jobs_lookup[order.job_name],
                 "record_num": order.record_num,
                 "fname": order.fname,
                 "lname": order.lname,

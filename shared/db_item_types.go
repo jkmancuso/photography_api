@@ -29,21 +29,21 @@ type DBJobItem struct {
 
 type DBOrderItem struct {
 	Id              string            `dynamodbav:"id" json:"id,omitempty"`
-	JobName         string            `dynamodbav:"job_name" json:"job_name,omitempty"`
-	JobId           string            `dynamodbav:"job_id" json:"job_id,omitempty"`
-	RecordNum       int               `dynamodbav:"record_num" json:"record_num,omitempty"`
-	Fname           string            `dynamodbav:"fname" json:"fname,omitempty"`
-	Lname           string            `dynamodbav:"lname" json:"lname,omitempty"`
-	Address         string            `dynamodbav:"address" json:"address,omitempty"`
-	City            string            `dynamodbav:"city" json:"city,omitempty"`
-	State           string            `dynamodbav:"state" json:"state,omitempty"`
-	Zip             string            `dynamodbav:"zip" json:"zip,omitempty"`
-	Phone           string            `dynamodbav:"phone" json:"phone,omitempty"`
-	GroupQuantity   int               `dynamodbav:"group_quantity" json:"group_quantity,omitempty"`
-	Group           string            `dynamodbav:"group" json:"group,omitempty"`
-	GroupPictureNum string            `dynamodbav:"group_picture_num" json:"group_picture_num,omitempty"`
-	CheckNum        int               `dynamodbav:"check_num" json:"check_num,omitempty"`
-	Amount          int               `dynamodbav:"amount" json:"amount,omitempty"`
+	JobName         string            `dynamodbav:"job_name" json:"job_name"`
+	JobId           string            `dynamodbav:"job_id" json:"job_id"`
+	RecordNum       int               `dynamodbav:"record_num" json:"record_num"`
+	Fname           string            `dynamodbav:"fname" json:"fname"`
+	Lname           string            `dynamodbav:"lname" json:"lname"`
+	Address         string            `dynamodbav:"address" json:"address"`
+	City            string            `dynamodbav:"city" json:"city"`
+	State           string            `dynamodbav:"state" json:"state"`
+	Zip             string            `dynamodbav:"zip" json:"zip"`
+	Phone           string            `dynamodbav:"phone" json:"phone"`
+	GroupQuantity   int               `dynamodbav:"group_quantity" json:"group_quantity"`
+	Group           string            `dynamodbav:"group" json:"group"`
+	GroupPictureNum string            `dynamodbav:"group_picture_num" json:"group_picture_num"`
+	CheckNum        int               `dynamodbav:"check_num" json:"check_num"`
+	Amount          int               `dynamodbav:"amount" json:"amount"`
 	Section         InstrumentSection `dynamodbav:"section" json:"section,omitempty"`
 	CreatedAt       time.Time         `dynamodbav:"created_at,omitempty"`
 	ExpireAt        int64             `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`

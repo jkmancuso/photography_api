@@ -35,7 +35,7 @@ class Converter:
                 "picture_num":row['section']['picture_num']
                 }
         
-        return Order(row['id'],row['job_name'],row['job_id'],int(row['job_year']),
+        return Order(row['id'],row['job_name'],row['job_id'],
                     int(row['record_num']),row['fname'],row['lname'],row['address'],
                     row['city'],row['state'],row['zip'],row['phone'],
                     int(row['group_quantity']),row['group'],row['group_picture_num'], 
@@ -59,7 +59,7 @@ class Converter:
             "picture_num": row['instrument_picturenum'],
             }
 
-        return Order(row['customer_id'],job_name,row['job_id'],int(job_year),
+        return Order(row['customer_id'],job_name,row['job_id'],
                     int(row['record_num']),row['fname'],row['lname'],row['address'],
                     row['city'],row['state'],row['zip'],row['phone'],
                     int(row['group_quantity']),group,row['group_picturenum'], 
