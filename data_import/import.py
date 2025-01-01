@@ -37,10 +37,12 @@ if __name__ == '__main__':
     
     if len(missing_jobs)>0:
         confirm=input("Add the missing Jobs to the DB? [Y/N]")
-        print(confirm)
+
+        if confirm == 'Y':
+            api.post_jobs(missing_jobs)    
     
     #########################
 
     ##NOW ORDERS#############
-    
+
     db.close()

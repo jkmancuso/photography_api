@@ -1,6 +1,6 @@
 import requests
 import logging
-
+from job import Job
 class API:
 
     logging.basicConfig(level=logging.INFO)
@@ -37,3 +37,29 @@ class API:
             exit(1)
         
         return r.json()
+    
+    def post_jobs(self,jobs: list[Job]):
+        url=f"{self.url}/jobs"
+
+        for job in jobs:
+            
+            job_data={
+                'job_name': job.job_name,
+                'job_year': job.job_year
+            }
+
+            logging.info(f"HTTP POST {url}")
+            logging.info(f"with headers {self.headers}")
+            logging.info(f"with payload {job_data}")
+             
+
+            r = requests.post(url,json=job_data,headers=self.headers)
+            
+
+            if r.status_code!=200:
+                logging.error(f"Request:{r.request.body}")
+                logging.error(f"{r.status_code}: {r.json()}")
+                exit(1)
+            
+            logging.info("SUCCESS")
+        

@@ -125,6 +125,8 @@ func (h handlerDBConn) addJobHandler(w http.ResponseWriter, r *http.Request) {
 	bytesBody, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
+	log.Debugf("Bytes Body: %v", string(bytesBody))
+
 	//1. validate payload
 	if len(bytesBody) == 0 || err != nil {
 		w.WriteHeader(http.StatusBadRequest)
