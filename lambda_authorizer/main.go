@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"os"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -45,6 +47,11 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayCustomAuthoriz
 }
 
 func main() {
+
+	if loglevel, found := os.LookupEnv("LOGLEVEL"); found {
+		level, _ := log.ParseLevel(loglevel)
+		log.SetLevel(level)
+	}
 
 	lambda.Start(handler)
 

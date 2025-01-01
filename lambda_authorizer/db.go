@@ -40,6 +40,7 @@ func sessionExistsInDB(ctx context.Context, id string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	db.ConsistentRead = true
 
 	resp, err := db.GetItem(ctx, pKey)
 

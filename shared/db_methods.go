@@ -70,6 +70,7 @@ func (db DBInfo) GetItem(ctx context.Context, pKey map[string]types.AttributeVal
 
 	log.Debugf("GetItem for Table: %s", db.Tablename)
 	log.Debugf("Key is: %+v", pKey)
+	log.Debugf("ConsistentRead: %v", db.ConsistentRead)
 
 	input := &dynamodb.GetItemInput{
 		TableName:      &db.Tablename,
