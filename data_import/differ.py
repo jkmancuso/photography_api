@@ -1,5 +1,6 @@
 from job import Job
 from order import Order
+import logging
 
 class Differ:
 
@@ -13,8 +14,11 @@ class Differ:
 
         for job in jobs_in_DB:
             if job.job_name not in jobnames_in_api:
+                logging.info(f"DB Job: {job.job_name} MISSING")
                 diff.append(job)
-        
+            else:
+                logging.info(f"DB Job: {job.job_name} FOUND")
+                  
         return diff
 
     @staticmethod

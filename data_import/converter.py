@@ -2,20 +2,17 @@ from job import Job
 from order import Order
 
 class Converter:
-    def __init__(self,instruments: list, groups: list, jobs: list):
+    def __init__(self,instruments: list[dict], groups: list[dict], jobs: list[dict]):
         self.instruments={}
         self.groups={}
         self.jobs={}
-
-        #this allows to lookup instruments by id
+        
         for row in instruments:
             self.instruments[row['instrument_id']]=row
 
-        #this allows to lookup groups by id
         for row in groups:
             self.groups[row['group_id']]=row
 
-        #this allows to lookup jobs by id
         for row in jobs:
             self.groups[row['job_id']]=row
 
