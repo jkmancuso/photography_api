@@ -48,20 +48,32 @@ class Converter:
     def convert_DBorder_to_Order(self, row: dict) -> Order:
 
         job_name=self.jobs[row['job_id']]['job_name']
-        job_year=self.jobs[row['job_id']]['job_year']
-        group=self.groups[int(row['group_id'])]['groupname']
 
-        section={
-            "name": self.instruments[row['instrument_id']]['section'],
-            "instrument": self.instruments[row['instrument_id']]['instrument'],
-            "quantity": int(row['instrument_quantity']),
-            "position": row['instrument_position'],
-            "picture_num": row['instrument_picturenum'],
-            }
+        if not row['group_quantity'] or row['group_quantity']==0:
+            group=""
+            group_quantity=0
+            group_picturenum=""
+        else:
+            group=self.groups[int(row['group_id'])]['groupname']
+            group_quantity=int(row['group_quantity'])
+            group_picturenum=row['group_picturenum']
+        
+        section ={}
+
+        if int(row['instrument_quantity'])>0:
+
+            section={
+                "name": self.instruments[row['instrument_id']]['section'],
+                "instrument": self.instruments[row['instrument_id']]['instrument'],
+                "quantity": int(row['instrument_quantity']),
+                "position": row['instrument_position'],
+                "picture_num": row['instrument_picturenum'],
+                }
+
 
         return Order(row['customer_id'],job_name,row['job_id'],
                     int(row['record_num']),row['fname'],row['lname'],row['address'],
                     row['city'],row['state'],row['zip'],row['phone'],
-                    int(row['group_quantity']),group,row['group_picturenum'], 
+                    group_quantity,group,group_picturenum, 
                     int(row['checknum']),int(row['amount']),section)
 

@@ -51,11 +51,9 @@ if __name__ == '__main__':
         missing_orders=Differ.get_JobOrders_not_in_Dynamo(orders_already_in_api,orders_in_db)
 
         if len(missing_orders)>0:
-            confirm=input("Add the missing Order to the DB? [Y/N]")
+            confirm=input(f"{job.job_name}: Add the missing orders to the DB? [Y/N]")
 
             if confirm == 'Y':
                 api.post_orders(missing_orders)
-
-        exit(0)
 
     db.close()
