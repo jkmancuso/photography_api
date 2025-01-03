@@ -49,7 +49,7 @@ func SetupRoutes(tableMap map[string]*shared.DBInfo, mux *http.ServeMux) {
 		shared.ValidateIdMiddleware(shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.deleteGroupHandler))))
 	mux.Handle("POST /groups",
 		shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.addGroupHandler)))
-	mux.Handle("PATCH /groups{id}",
+	mux.Handle("PATCH /groups/{id}",
 		shared.ValidateIdMiddleware(shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.updateGroupHandler))))
 
 	/*ORDERS*/
