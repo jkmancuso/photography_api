@@ -17,18 +17,6 @@ func (h handlerDBConn) updateInstrumentHandler(w http.ResponseWriter, r *http.Re
 	// 1. check valid id in /instruments/{id} path
 	id := r.PathValue("id")
 
-	if len(id) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
-		return
-	}
-
-	if !shared.IsUUID(id) {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
-		return
-	}
-
 	// 2. check valid body which should be the params to change
 	bytesBody, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -93,18 +81,6 @@ func (h handlerDBConn) deleteInstrumentHandler(w http.ResponseWriter, r *http.Re
 
 	id := r.PathValue("id")
 
-	if len(id) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
-		return
-	}
-
-	if !shared.IsUUID(id) {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
-		return
-	}
-
 	count, err := database.DeleteInstrument(context.Background(), h.dbInfo, id)
 
 	if err != nil {
@@ -126,18 +102,6 @@ func (h handlerDBConn) deleteInstrumentHandler(w http.ResponseWriter, r *http.Re
 func (h handlerDBConn) getInstrumentByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
-
-	if len(id) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
-		return
-	}
-
-	if !shared.IsUUID(id) {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
-		return
-	}
 
 	idVal, _ := attributevalue.Marshal(id)
 	pKey := map[string]types.AttributeValue{"id": idVal}

@@ -41,18 +41,6 @@ func (h handlerDBConn) deleteOrderHandler(w http.ResponseWriter, r *http.Request
 
 	id := r.PathValue("id")
 
-	if len(id) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
-		return
-	}
-
-	if !shared.IsUUID(id) {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
-		return
-	}
-
 	count, err := database.DeleteOrder(context.Background(), h.dbInfo, id)
 
 	if err != nil {
@@ -75,18 +63,6 @@ func (h handlerDBConn) updateOrderHandler(w http.ResponseWriter, r *http.Request
 
 	// 1. check valid id in /orders/{id} path
 	id := r.PathValue("id")
-
-	if len(id) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
-		return
-	}
-
-	if !shared.IsUUID(id) {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
-		return
-	}
 
 	// 2. check valid body which should be the params to change
 	bytesBody, err := io.ReadAll(r.Body)
@@ -131,17 +107,6 @@ func (h handlerDBConn) updateOrderHandler(w http.ResponseWriter, r *http.Request
 func (h handlerDBConn) getOrderByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
-
-	if len(id) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
-	}
-
-	if !shared.IsUUID(id) {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
-		return
-	}
 
 	idVal, _ := attributevalue.Marshal(id)
 

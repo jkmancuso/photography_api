@@ -22,9 +22,9 @@ func SetupRoutes(tableMap map[string]*shared.DBInfo, mux *http.ServeMux) {
 	mux.Handle("GET /jobs",
 		shared.CorsMiddleware(http.HandlerFunc(jobsDBConn.getJobsHandler)))
 	mux.Handle("GET /jobs/{id}",
-		shared.CorsMiddleware(http.HandlerFunc(jobsDBConn.getJobByIdHandler)))
+		shared.ValidateIdMiddleware(shared.CorsMiddleware(http.HandlerFunc(jobsDBConn.getJobByIdHandler))))
 	mux.Handle("DELETE /jobs/{id}",
-		shared.CorsMiddleware(http.HandlerFunc(jobsDBConn.deleteJobHandler)))
+		shared.ValidateIdMiddleware(shared.CorsMiddleware(http.HandlerFunc(jobsDBConn.deleteJobHandler))))
 	mux.Handle("POST /jobs",
 		shared.CorsMiddleware(http.HandlerFunc(jobsDBConn.addJobHandler)))
 
@@ -32,25 +32,25 @@ func SetupRoutes(tableMap map[string]*shared.DBInfo, mux *http.ServeMux) {
 	mux.Handle("GET /instruments",
 		shared.CorsMiddleware(http.HandlerFunc(instrumentsDBConn.getInstrumentsHandler)))
 	mux.Handle("GET /instruments/{id}",
-		shared.CorsMiddleware(http.HandlerFunc(instrumentsDBConn.getInstrumentByIdHandler)))
+		shared.ValidateIdMiddleware(shared.CorsMiddleware(http.HandlerFunc(instrumentsDBConn.getInstrumentByIdHandler))))
 	mux.Handle("DELETE /instruments/{id}",
-		shared.CorsMiddleware(http.HandlerFunc(instrumentsDBConn.deleteInstrumentHandler)))
+		shared.ValidateIdMiddleware(shared.CorsMiddleware(http.HandlerFunc(instrumentsDBConn.deleteInstrumentHandler))))
 	mux.Handle("POST /instruments",
 		shared.CorsMiddleware(http.HandlerFunc(instrumentsDBConn.addInstrumentHandler)))
 	mux.Handle("PATCH /instruments/{id}",
-		shared.CorsMiddleware(http.HandlerFunc(instrumentsDBConn.updateInstrumentHandler)))
+		shared.ValidateIdMiddleware(shared.CorsMiddleware(http.HandlerFunc(instrumentsDBConn.updateInstrumentHandler))))
 
 	/*GROUPS*/
 	mux.Handle("GET /groups",
 		shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.getGroupsHandler)))
 	mux.Handle("GET /groups/{id}",
-		shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.getGroupByIdHandler)))
+		shared.ValidateIdMiddleware(shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.getGroupByIdHandler))))
 	mux.Handle("DELETE /groups/{id}",
-		shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.deleteGroupHandler)))
+		shared.ValidateIdMiddleware(shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.deleteGroupHandler))))
 	mux.Handle("POST /groups",
 		shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.addGroupHandler)))
-	mux.Handle("PATCH /groups",
-		shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.updateGroupHandler)))
+	mux.Handle("PATCH /groups{id}",
+		shared.ValidateIdMiddleware(shared.CorsMiddleware(http.HandlerFunc(groupsDBConn.updateGroupHandler))))
 
 	/*ORDERS*/
 	mux.Handle("GET /jobs/{job_id}/orders/{record_num}",
@@ -60,13 +60,13 @@ func SetupRoutes(tableMap map[string]*shared.DBInfo, mux *http.ServeMux) {
 	mux.Handle("GET /orders",
 		shared.CorsMiddleware(http.HandlerFunc(ordersDBConn.getOrdersHandler)))
 	mux.Handle("GET /orders/{id}",
-		shared.CorsMiddleware(http.HandlerFunc(ordersDBConn.getOrderByIdHandler)))
+		shared.ValidateIdMiddleware(shared.CorsMiddleware(http.HandlerFunc(ordersDBConn.getOrderByIdHandler))))
 	mux.Handle("DELETE /orders/{id}",
 		shared.CorsMiddleware(http.HandlerFunc(ordersDBConn.deleteOrderHandler)))
 	mux.Handle("POST /orders",
 		shared.CorsMiddleware(http.HandlerFunc(ordersDBConn.addOrderHandler)))
 	mux.Handle("PATCH /orders/{id}",
-		shared.CorsMiddleware(http.HandlerFunc(ordersDBConn.updateOrderHandler)))
+		shared.ValidateIdMiddleware(shared.CorsMiddleware(http.HandlerFunc(ordersDBConn.updateOrderHandler))))
 
 	mux.Handle("GET /zipcodes/{code}",
 		shared.CorsMiddleware(http.HandlerFunc(zipcodesDBConn.getZipByIdHandler)))

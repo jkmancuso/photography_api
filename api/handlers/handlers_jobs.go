@@ -39,18 +39,6 @@ func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) 
 
 	id := r.PathValue("id")
 
-	if len(id) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
-		return
-	}
-
-	if !shared.IsUUID(id) {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
-		return
-	}
-
 	orderURL := fmt.Sprintf("/jobs/%s/orders", id)
 	orderItems, err := checkOrderHandler(orderURL)
 
@@ -87,18 +75,6 @@ func (h handlerDBConn) deleteJobHandler(w http.ResponseWriter, r *http.Request) 
 func (h handlerDBConn) getJobByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
-
-	if len(id) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_CANNOT_BE_EMPTY)
-		return
-	}
-
-	if !shared.IsUUID(id) {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(shared.ID_NOT_IN_UUID_FORMAT)
-		return
-	}
 
 	idVal, _ := attributevalue.Marshal(id)
 	pKey := map[string]types.AttributeValue{"id": idVal}
