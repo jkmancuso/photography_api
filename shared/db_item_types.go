@@ -44,6 +44,7 @@ type DBOrderItem struct {
 	GroupPictureNum string            `dynamodbav:"group_picture_num" json:"group_picture_num"`
 	CheckNum        int               `dynamodbav:"check_num" json:"check_num"`
 	Amount          int               `dynamodbav:"amount" json:"amount"`
+	PaymentMethod   string            `dynamodbav:"payment_method" json:"payment_method"`
 	Section         InstrumentSection `dynamodbav:"section" json:"section,omitempty"`
 	CreatedAt       time.Time         `dynamodbav:"created_at,omitempty"`
 	ExpireAt        int64             `dynamodbav:"expire_at,omitempty" json:"expire_at,omitempty"`
