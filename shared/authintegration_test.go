@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"testing"
@@ -101,8 +102,23 @@ func TestAuth(t *testing.T) {
 				t.Fatalf("Got status %d, wanted %d", resp.StatusCode, tt.WantStatusCode)
 			}
 
-			if resp.StatusCode == http.StatusOK && len(resp.Header.Get("Set-Cookie")) == 0 {
-				t.Fatal("Set-Cookie header not returned")
+			if resp.StatusCode == http.StatusOK {
+				authResponse := &DBSessionItem{}
+				responseBody, err := io.ReadAll(resp.Body)
+
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				err = json.Unmarshal(responseBody, authResponse)
+
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if len(authResponse.Id) == 0 {
+					t.Fatal("Session Id not returned!")
+				}
 			}
 		})
 	}

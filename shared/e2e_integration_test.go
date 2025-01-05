@@ -3,21 +3,43 @@ package shared
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 )
 
 type IntegrationTest struct {
 	Url          string
+	Client       *http.Client
+	XSessionId   string
 	Tests        []GenericTest
 	EndpointName string //this is [orders|jobs|etc]
 }
 
+func (i *IntegrationTest) setCreds() error {
+
+	//set as env variables since most likely running locally
+	i.XSessionId = os.Getenv("SESSION_ID")
+
+	if len(i.XSessionId) == 0 {
+		return errors.New("Cannot find local variable SESSION_ID")
+	}
+
+	return nil
+}
+
 func (i *IntegrationTest) setup(t *testing.T) {
 	t.Helper()
+
+	if err := i.setCreds(); err != nil {
+		t.Fatal(err)
+	}
+
+	i.Client = &http.Client{Timeout: time.Second * 3}
 
 	//populated item
 	validPayload := NewDBItem(i.EndpointName)
@@ -59,7 +81,15 @@ func TestE2E(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			reader := bytes.NewReader(tt.BodyBytes)
 
-			resp, err := http.Post(test.Url, ContentType, reader)
+			req, err := http.NewRequest("POST", test.Url, reader)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req.Header.Add("x-session-id", test.XSessionId)
+
+			resp, err := test.Client.Do(req)
 
 			if err != nil {
 				t.Fatal(err)
@@ -103,7 +133,15 @@ func TestE2E(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			URL := fmt.Sprintf("%s/%s", test.Url, Id)
 
-			resp, err := http.Get(URL)
+			req, err := http.NewRequest("GET", URL, nil)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req.Header.Add("x-session-id", test.XSessionId)
+
+			resp, err := test.Client.Do(req)
 
 			if err != nil {
 				t.Fatal(err)
@@ -134,7 +172,15 @@ func TestE2E(t *testing.T) {
 	t.Run(testName, func(t *testing.T) {
 		returnedItems := []*IdOnly{}
 
-		resp, err := http.Get(test.Url)
+		req, err := http.NewRequest("GET", test.Url, nil)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		req.Header.Add("x-session-id", test.XSessionId)
+
+		resp, err := test.Client.Do(req)
 
 		if err != nil {
 			t.Fatal(err)
@@ -172,7 +218,9 @@ func TestE2E(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			resp, err := http.DefaultClient.Do(req)
+			req.Header.Add("x-session-id", test.XSessionId)
+
+			resp, err := test.Client.Do(req)
 
 			if err != nil || resp.StatusCode != http.StatusOK {
 				t.Fatalf("Error deleting %s", test.EndpointName)
