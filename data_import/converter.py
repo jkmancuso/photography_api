@@ -7,7 +7,8 @@ class Converter:
         self.instruments={}
         self.groups={}
         self.jobs={}
-        
+        self.positions={"1":"1st","2":"2nd","3":"3rd"}
+
         for row in instruments:
             self.instruments[row['instrument_id']]=row
 
@@ -16,6 +17,7 @@ class Converter:
 
         for row in jobs:
             self.jobs[row['job_id']]=row
+        
 
     @staticmethod
     def convert_apijob_to_Job(row: dict) -> Job:
@@ -66,7 +68,7 @@ class Converter:
                 "name": self.instruments[row['instrument_id']]['section'],
                 "instrument": self.instruments[row['instrument_id']]['instrument'],
                 "quantity": int(row['instrument_quantity']),
-                "position": row['instrument_position'],
+                "position": self.positions[row['instrument_position']],
                 "picture_num": row['instrument_picturenum'],
                 }
 
